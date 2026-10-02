@@ -356,8 +356,28 @@ textarea {
 .info-box { background: #172554; border: 1px solid #1e40af; color: #bfdbfe; padding: 0.8rem; border-radius: 10px; font-size: 0.85rem; }
 .warning-box { background: #451a03; border: 1px solid #d97706; color: #fef3c7; padding: 0.8rem; border-radius: 10px; font-size: 0.85rem; }
 footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem; }
+
+/* A connected learning path with touch-friendly steps. */
+.dungeon-map { background:linear-gradient(155deg,#172d32,#101c26); border-color:#36545d; }
+.dungeon-grid { display:flex; flex-direction:column; gap:0; max-height:480px; overflow-y:auto; padding-right:.35rem; scrollbar-color:#75919b #14232b; }
+.chamber-node { display:flex; flex-direction:row; justify-content:flex-start; gap:.7rem; text-align:left; padding:.65rem .6rem; margin:.3rem 0 .3rem 1rem; min-height:56px; border-radius:14px; width:calc(100% - 1rem); background:#1b303a; }
+.chamber-node::before { content:""; position:absolute; width:2px; height:calc(100% + .7rem); left:-12px; top:50%; background:#55737d; }
+.chamber-node:last-child::before { height:0; }
+.step-number { width:30px; height:30px; flex-shrink:0; display:grid; place-items:center; border-radius:50%; background:#0d1b24; border:1px solid #75919b; font-weight:bold; }
+.step-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.step-copy small { font-size:.68rem; color:#b6ced5; }
+.chamber-node.current { background:#403117; border-color:#fbbf24; box-shadow:0 0 0 2px #fbbf2420; }
+.chamber-node.unlocked { background:#123d36; border-color:#34d399; }
+.chamber-node.fog { opacity:.65; background:#14232b; }
+.path-progress { height:8px; border-radius:8px; overflow:hidden; background:#30444b; margin-top:.8rem; }
+#path-progress-fill { height:100%; width:0; background:linear-gradient(90deg,#34d399,#fbbf24); transition:width .3s; }
+.path-summary { font-size:.78rem; color:#c8dde3; line-height:1.5; }
+.path-goal { padding:.8rem; color:#fde68a; font-weight:600; font-size:.85rem; border-top:1px solid #36545d; margin-top:.7rem; }
+.chamber-node:focus-visible { outline:3px solid #fbbf24; outline-offset:3px; }
+@media (prefers-reduced-motion:reduce) { #path-progress-fill { transition:none; } }
+
 </style>
-<script src="/_aistudio-iframe.js?v=2c34bde1"></script></head>
+</head>
 <body>
 
 <header>
@@ -365,12 +385,12 @@ footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem;
     <span class="logo">♪</span>
     <div>
       <h1>Musica Aeterna</h1>
-      <p>Das Epochen-Labyrinth · iPad Edition</p>
+      <p>Dein Weg durch die Musikgeschichte</p>
     </div>
   </div>
   <nav>
     <button data-sec="start-section" class="active" onclick="showSection('start-section')">Start</button>
-    <button data-sec="quiz-section" onclick="showSection('quiz-section')">Labyrinth</button>
+    <button data-sec="quiz-section" onclick="showSection('quiz-section')">Lösungspfad</button>
     <button data-sec="wissen-section" onclick="showSection('wissen-section')">Wissen</button>
     <button data-sec="check-section" onclick="showSection('check-section')">Checkliste</button>
     <button data-sec="lehr-section" onclick="showSection('lehr-section')">Lehrkraft</button>
@@ -380,18 +400,18 @@ footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem;
 <main>
   <!-- START -->
   <section id="start-section">
-    <h2>Das Labyrinth der Musikgeschichte</h2>
-    <p>Durchschreite die geheimnisvollen Hallen der europäischen Musikepochen. Schwere Tore und Vorhängeschlösser versperren den Weg: Nur wer mit der richtigen Fachinschrift den passenden Schlüssel wählt, bricht das Schloss und lässt die Tore aufschwingen!</p>
+    <h2>Dein Lösungspfad durch die Musikgeschichte</h2>
+    <p>Wähle eine Epoche und folge ihren musikalischen Spuren. Jede gelöste Etappe bringt dich näher an deine eigene Präsentation. Hinweise helfen dir weiter; falsche Antworten kannst du erneut versuchen.</p>
     
     <div class="info-box">
-      <strong>Spielerisches Labyrinth-Prinzip:</strong> Links siehst du den architektonischen Grundriss mit Fackeln, Pfaden und deiner aktuellen Position (🚶). Rechts öffnest du das Schloss der Kammer.
+      <strong>Entdecken → Verstehen → Präsentieren:</strong> Dein Pfad zeigt alle Etappen und ihre Themen. Löse sie der Reihe nach, lies die Erklärungen und überprüfe anschließend deine Präsentation mit der passenden Checkliste.
     </div>
 
-    <h3>Wähle ein Epochen-Labyrinth</h3>
+    <h3>Wähle deinen Epochenpfad</h3>
     <div class="grid-epochs" id="home-epoch-grid"></div>
 
     <div style="display:flex; gap:0.6rem; margin-top:1rem; flex-wrap:wrap;">
-      <button onclick="startEpoch('mittelalter')">Mittelalter betreten →</button>
+      <button onclick="startEpoch('mittelalter')">Mittelalter entdecken →</button>
       <button class="secondary" onclick="showSection('wissen-section')">Wissen entdecken</button>
       <button class="secondary" onclick="showSection('check-section')">Präsentations-Checkliste</button>
     </div>
@@ -401,12 +421,12 @@ footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem;
   <section id="quiz-section" hidden>
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; margin-bottom:0.8rem;">
       <div>
-        <h2 style="margin:0;" id="quiz-title">Epochen-Labyrinth</h2>
+        <h2 style="margin:0;" id="quiz-title">Epochenpfad</h2>
         <div style="font-size:0.85rem; color:#a8a29e;" id="quiz-subtitle">Kammer 1 von 10</div>
       </div>
       <div style="display:flex; gap:0.4rem; align-items:center;">
         <button class="secondary" style="min-height:38px; padding:0.3rem 0.6rem; font-size:0.8rem;" id="sound-btn" onclick="toggleSound()">🔊 Ton an</button>
-        <button class="secondary" style="min-height:38px; padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="resetCurrentEpoch()">Labyrinth neu starten</button>
+        <button class="secondary" style="min-height:38px; padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="resetCurrentEpoch()">Pfad neu starten</button>
       </div>
     </div>
 
@@ -424,10 +444,13 @@ footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem;
 
         <div class="dungeon-map">
           <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:bold; color:#fef3c7;">
-            <span>Labyrinth-Grundriss</span>
+            <span>Dein Lösungspfad</span>
             <span id="minimap-count" style="color:var(--gold);">0 / 10 entriegelt</span>
           </div>
+          <div class="path-progress" role="progressbar" aria-label="Gelöste Etappen" id="path-progress"><div id="path-progress-fill"></div></div>
+          <p id="path-summary" aria-live="polite" class="path-summary"></p>
           <div class="dungeon-grid" id="dungeon-nodes"></div>
+          <div class="path-goal">✦ Ziel: Deine Epochenpräsentation</div>
         </div>
       </div>
 
@@ -442,7 +465,7 @@ footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem;
           <div id="q-grafik"></div>
 
           <div class="lock-banner">
-            <span id="lock-status-txt">🔒 Schloss verriegelt · Wähle den passenden Schlüssel:</span>
+            <span id="lock-status-txt">Welche Antwort passt?</span>
             <span id="key-count-txt" style="font-family:monospace; color:var(--gold);">Schlüssel #1</span>
           </div>
 
@@ -451,7 +474,7 @@ footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem;
           <div id="feedback-area" hidden></div>
 
           <div id="hint-area" style="margin-top:0.8rem;">
-            <button class="secondary" style="min-height:38px; font-size:0.8rem; padding:0.3rem 0.7rem;" onclick="toggleHint()">📜 Schriftrolle des Archivars</button>
+            <button class="secondary" style="min-height:38px; font-size:0.8rem; padding:0.3rem 0.7rem;" onclick="toggleHint()">💡 Hinweis zur Etappe</button>
             <div id="hint-content" class="warning-box" style="margin-top:0.5rem;" hidden></div>
           </div>
         </div>
@@ -470,7 +493,9 @@ footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem;
   <!-- CHECKLISTE & NOTIZEN -->
   <section id="check-section" hidden>
     <h2>Präsentations-Checkliste</h2>
-    <p>Überprüfe deine Recherche und bereite dein Referat vor.</p>
+    <p>Überprüfe Präsentation und Exzerpt anhand deines Aufgabenblatts. Die Vorgaben sind für jede Arbeitsgruppe einzeln abrufbar.</p>
+    <label for="check-epoch">Dein Aufgabenblatt</label>
+    <select id="check-epoch" onchange="checkEpoch=this.value; renderChecklist()" style="width:100%; margin:0.6rem 0 1rem; min-height:44px;"></select>
     <div id="checklist-items"></div>
     
     <h3 style="margin-top:1.5rem;">Deine Notizen</h3>
@@ -485,7 +510,7 @@ footer { text-align: center; padding: 1.5rem; color: #78716c; font-size: 0.8rem;
   <!-- LEHRKRAFT -->
   <section id="lehr-section" hidden>
     <h2>Hinweise für die Lehrkraft</h2>
-    <p>Musica Aeterna – Labyrinth für den gymnasialen Musikunterricht (10. Klasse). Es führt spielerisch durch historische Architektur und Notenbilder und ist zu 100% offline ohne Server lauffähig.</p>
+    <p>Musica Aeterna – Lösungspfad für den gymnasialen Musikunterricht (10. Klasse). Es führt in einzelnen Etappen durch die Musikgeschichte und Notenbilder und ist zu 100% offline ohne Server lauffähig.</p>
   </section>
 </main>
 
@@ -908,6 +933,8 @@ function toggleSound() {
 }
 
 function showSection(id) {
+  if (id === "check-section") { if(currentEpoch !== "moderne") checkEpoch = currentEpoch; renderChecklist(); }
+  if (id === "wissen-section") renderWissen();
   document.querySelectorAll("main > section").forEach(s => s.hidden = (s.id !== id));
   document.querySelectorAll("header nav button").forEach(b => {
     b.classList.toggle("active", b.dataset.sec === id);
@@ -917,6 +944,7 @@ function showSection(id) {
 
 function startEpoch(ep) {
   currentEpoch = ep;
+  checkEpoch = ep === "moderne" ? "moderne_vor" : ep;
   currentChamber = 0;
   hintOpen = false;
   showSection("quiz-section");
@@ -966,8 +994,8 @@ function renderQuiz() {
 
   document.documentElement.style.setProperty("--ep", meta.color);
 
-  document.getElementById("quiz-title").textContent = `Labyrinth: ${meta.name}`;
-  document.getElementById("quiz-subtitle").textContent = `Kammer ${currentChamber + 1} von ${list.length} (${CHAMBER_NAMES[currentChamber]}) · ${meta.zeit}`;
+  document.getElementById("quiz-title").textContent = `Lösungspfad: ${meta.name}`;
+  document.getElementById("quiz-subtitle").textContent = `Etappe ${currentChamber + 1} von ${list.length} · ${q.b} · ${meta.zeit}`;
 
   document.getElementById("chamber-epoch-tag").textContent = `${meta.name} (${meta.zeit})`;
   document.getElementById("chamber-name").textContent = meta.setting;
@@ -975,41 +1003,38 @@ function renderQuiz() {
   document.getElementById("chamber-style").textContent = `Stil: ${meta.style}`;
 
   const correctCount = list.filter(item => userAnswers[item.id] === item.c).length;
-  document.getElementById("minimap-count").textContent = `${correctCount} von ${list.length} entriegelt`;
+  document.getElementById("minimap-count").textContent = `${correctCount} / ${list.length} gelöst`;
 
+  const progress = document.getElementById("path-progress");
+  progress.setAttribute("aria-valuemin", "0");
+  progress.setAttribute("aria-valuemax", String(list.length));
+  progress.setAttribute("aria-valuenow", String(correctCount));
+  document.getElementById("path-progress-fill").style.width = `${correctCount / list.length * 100}%`;
+  document.getElementById("path-summary").textContent = correctCount === list.length
+    ? "Alle Etappen gelöst! Bereite jetzt deine Präsentation vor."
+    : "Folge den Themen Schritt für Schritt. Gelöste Etappen kannst du jederzeit wiederholen.";
   document.getElementById("dungeon-nodes").innerHTML = list.map((item, idx) => {
-    const isAns = item.id in userAnswers;
-    const ok = isAns && userAnswers[item.id] === item.c;
+    const ok = userAnswers[item.id] === item.c;
     const isCur = idx === currentChamber;
-    const reachable = idx === 0 || (idx > 0 && userAnswers[list[idx-1]?.id] === list[idx-1]?.c);
-    const isFog = !reachable && !isAns && !isCur;
-
-    let cls = "chamber-node";
-    if (isCur) cls += " current";
-    else if (ok) cls += " unlocked";
-    else if (isAns) cls += " locked";
-    else if (isFog) cls += " fog";
-
-    let icon = isFog ? "🌫️" : ok ? "🔓" : isAns ? "🔒" : isCur ? "🚶" : "🚪";
-    let name = isFog ? "???" : CHAMBER_NAMES[idx];
-
-    return `<button class="${cls}" ${isFog ? "disabled" : ""} onclick="goToChamber(${idx})">
-      <div style="font-size:0.65rem; opacity:0.75;">K${idx + 1}</div>
-      <div style="font-size:0.95rem; margin:1px 0;">${icon}</div>
-      <div style="font-size:0.68rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px;">${name}</div>
+    const reachable = idx === 0 || userAnswers[list[idx - 1].id] === list[idx - 1].c;
+    const status = ok ? "Gelöst" : isCur ? "Du bist hier" : reachable ? "Bereit" : "Nächste Etappe";
+    return `<button class="chamber-node ${isCur ? 'current' : ok ? 'unlocked' : !reachable ? 'fog' : ''}"
+      ${!reachable && !ok ? 'disabled' : ''} ${isCur ? 'aria-current="step"' : ''} onclick="goToChamber(${idx})">
+      <span class="step-number">${ok ? '✓' : idx + 1}</span>
+      <span class="step-copy"><strong>${item.b}</strong><small>${status}</small></span>
     </button>`;
   }).join("");
+  document.getElementById("q-kicker").textContent = `Etappe ${currentChamber + 1} · ${q.b} ${q.tr ? "· Anwenden" : ""}`;
 
-  document.getElementById("q-kicker").textContent = `Kammer ${currentChamber + 1} (${CHAMBER_NAMES[currentChamber]}) · ${q.b} ${q.tr ? "· Transferfrage" : ""}`;
   document.getElementById("q-text").textContent = q.t;
   document.getElementById("q-grafik").innerHTML = renderSvgGrafik(q.g);
 
   document.getElementById("lock-status-txt").textContent = isRight
-    ? "🔓 Schloss entriegelt! Der Durchgang zur nächsten Kammer ist frei."
+    ? "✓ Etappe gelöst! Du kannst weitergehen."
     : answered
-    ? "🔒 Das Schloss rührt sich nicht · Falscher Schlüssel."
-    : "🔒 Schloss verriegelt · Wähle den passenden Schlüssel:";
-  document.getElementById("key-count-txt").textContent = `Kammer #${currentChamber + 1}`;
+    ? "Noch nicht ganz. Lies die Erklärung und versuche es erneut."
+    : "Welche Antwort passt?";
+  document.getElementById("key-count-txt").textContent = `Etappe ${currentChamber + 1}`;
 
   document.getElementById("portal-keys").innerHTML = q.o.map((opt, i) => {
     const isSelected = answered && chosen === i;
@@ -1020,9 +1045,9 @@ function renderQuiz() {
     else if (isWrong) cls += " wrong";
     const letter = String.fromCharCode(65 + i);
 
-    return `<button class="${cls}" ${answered ? "disabled" : ""} onclick="chooseOption(${i})">
+    return `<button class="${cls}" ${isRight ? "disabled" : ""} onclick="chooseOption(${i})">
       <div class="key-badge">${isCorrect ? "🗝️" : isWrong ? "✗" : letter}</div>
-      <div style="flex:1;">${opt} ${isCorrect ? "<b style='color:#a7f3d0'> – Schloss aufgesprengt!</b>" : isWrong ? "<b style='color:#fca5a5'> – Falscher Schlüssel</b>" : ""}</div>
+      <div style="flex:1;">${opt} ${isCorrect ? "<b style='color:#a7f3d0'> – Richtig!</b>" : isWrong ? "<b style='color:#fca5a5'> – Noch nicht richtig</b>" : ""}</div>
     </button>`;
   }).join("");
 
@@ -1032,12 +1057,12 @@ function renderQuiz() {
     fb.className = `feedback-banner ${isRight ? "ok" : "nok"}`;
     fb.innerHTML = `
       <div style="font-weight:bold; font-size:1rem; margin-bottom:0.3rem;">
-        ${isRight ? "✨ Tor schwingt auf!" : `🔒 Schloss blockiert. Richtiger Schlüssel: ${q.o[q.c]}`}
+        ${isRight ? "✓ Etappe geschafft!" : "Diese Antwort passt noch nicht."}
       </div>
       <div>${q.e}</div>
       <div style="margin-top:0.8rem; display:flex; justify-content:flex-end;">
-        ${currentChamber + 1 < list.length
-          ? `<button onclick="goToChamber(${currentChamber + 1})">Durch das Tor schreiten →</button>`
+        ${!isRight ? `<button onclick="retryQuestion()">Noch einmal versuchen ↻</button>` : currentChamber + 1 < list.length
+          ? `<button onclick="goToChamber(${currentChamber + 1})">Nächste Etappe →</button>`
           : `<button onclick="showSection('check-section')">Zur Präsentations-Checkliste →</button>`
         }
       </div>`;
@@ -1046,25 +1071,32 @@ function renderQuiz() {
   }
 
   document.getElementById("hint-content").hidden = true;
-  document.getElementById("hint-content").textContent = "Schriftrolle des Archivars: " + q.h;
+  document.getElementById("hint-content").textContent = "Hinweis: " + q.h;
   hintOpen = false;
 
   renderEpochBars();
+  const activeStep = document.querySelector(".chamber-node.current");
+  if (activeStep) activeStep.scrollIntoView({block:"nearest", inline:"nearest"});
 }
 
 function chooseOption(idx) {
   const list = Q_POOL[currentEpoch];
   const q = list[currentChamber];
-  if (q.id in userAnswers) return;
+  if (userAnswers[q.id] === q.c) return;
   userAnswers[q.id] = idx;
   const ok = idx === q.c;
   playTone(ok);
   renderQuiz();
 }
 
+function retryQuestion() {
+  delete userAnswers[Q_POOL[currentEpoch][currentChamber].id];
+  renderQuiz();
+}
+
 function goToChamber(idx) {
   const list = Q_POOL[currentEpoch];
-  if (idx >= 0 && idx < list.length) {
+  if (idx >= 0 && idx < list.length && (idx === 0 || userAnswers[list[idx - 1].id] === list[idx - 1].c)) {
     currentChamber = idx;
     renderQuiz();
   }
@@ -1092,36 +1124,32 @@ function renderWissen() {
     </div>`).join("");
 }
 
-const CHECK_ITEMS = [
-  "Ich habe eine eigene Leitfrage formuliert und beantworte sie am Ende begründet.",
-  "Ich habe das gesellschaftliche und historische Umfeld der Musikepoche erklärt.",
-  "Ich stelle mindestens zwei wichtige Komponistinnen/Komponisten vor.",
-  "Ich nenne mindestens ein konkret benanntes Werk und kenne dessen Besetzung.",
-  "Ich erkläre mindestens zwei typische musikalische Merkmale mit eigenen Worten.",
-  "Ich habe eine tatsächlich überprüfte Aufnahme als Hörbeispiel ausgewählt.",
-  "Ich kann mindestens zwei musikalische Merkmale am Hörbeispiel konkret belegen.",
-  "Ich habe mindestens drei fachlich zuverlässige Quellen verwendet und zitiert."
-];
-
-function renderChecklist() {
-  const saved = JSON.parse(localStorage.getItem("musicaCheck") || "{}");
-  document.getElementById("checklist-items").innerHTML = CHECK_ITEMS.map((item, idx) => {
-    const val = saved[idx] || "offen";
-    return `<div class="check-item">
-      <span>${item}</span>
-      <select onchange="saveCheck(${idx}, this.value)">
-        <option ${val === 'offen' ? 'selected' : ''}>offen</option>
-        <option ${val === 'teilweise' ? 'selected' : ''}>teilweise</option>
-        <option ${val === 'erledigt' ? 'selected' : ''}>erledigt</option>
-      </select>
-    </div>`;
-  }).join("");
+const CHECK_COMMON = [["overview", "Ich erkläre Gattungen, Stilistik und typische Merkmale der Epoche."], ["change", "Ich erläutere den musikalischen Wandel und die Übergänge zu anderen Epochen."], ["instruments", "Ich erläutere Besonderheiten, zum Beispiel Instrumente und Spielweisen."], ["people", "Ich stelle mindestens drei bekannte Vertreterinnen oder Vertreter vor."], ["audio", "Ich wähle ein typisches Hörbeispiel und benenne Werk sowie Urheber, soweit bekannt."], ["excerpt", "Ich erstelle ein Exzerpt mit höchstens zwei DIN-A4-Seiten."], ["clarity", "Mein Exzerpt ist übersichtlich, informativ und prägnant."]];
+const CHECK_EPOCHS = {"mittelalter": ["Mittelalter", ["Notenschrift und Neumen", "Geistliche Musik", "Weltliche Musik", "Frühe Mehrstimmigkeit"]], "renaissance": ["Renaissance", ["Entwicklung aus den Kirchentonarten", "Mehrchörigkeit"]], "barock": ["Barock", ["Entwicklung vom linearen, horizontalen zum vertikalen Denken", "Polyphonie", "Kontraste", "Musik als Abbild der göttlichen Ordnung", "Kirche und Hof", "Johann Sebastian Bach"]], "klassik": ["Wiener Klassik", ["Themendualismus und Formästhetik", "Mäzenatentum und Bürgertum", "Gattungen", "„Gegensteuern“ nach dem Barock"]], "romantik": ["Romantik", ["Bürgertum, Konzertwesen und Öffentlichkeit", "Individualismus, Subjektivismus und Ich-Ausdruck", "Gattungen", "Größe der Werke und des Orchesters", "Komplexität"]], "moderne_vor": ["Moderne / Neue Musik vor 1945", ["Pluralismus", "Rundfunk, Medien, Sponsoring und Konzertwesen", "Klangfarben und moderne Klangsprache", "Stil-Formen", "Impressionismus und Expressionismus", "Zwölftonmusik", "Neue Notationsschreibweisen"]], "moderne_nach": ["Post-Moderne / Neue Musik seit 1945", ["Rundfunk, Medien, Sponsoring und Konzertwesen", "Neue Klangfarben und moderne Klangsprache", "Cluster", "Aleatorik", "Serielle Musik", "Neue Einfachheit", "Minimal Music"]]};
+let checkEpoch = "mittelalter";
+function readChecks() {
+  try { return JSON.parse(localStorage.getItem("musicaCheckPdf_v2") || "{}"); }
+  catch { return {}; }
 }
-
-function saveCheck(idx, val) {
-  const saved = JSON.parse(localStorage.getItem("musicaCheck") || "{}");
-  saved[idx] = val;
-  localStorage.setItem("musicaCheck", JSON.stringify(saved));
+function renderChecklist() {
+  document.getElementById("check-epoch").innerHTML = Object.entries(CHECK_EPOCHS).map(([key, data]) =>
+    `<option value="${key}" ${key === checkEpoch ? 'selected' : ''}>${data[0]}</option>`).join("");
+  const saved = readChecks()[checkEpoch] || {};
+  const row = ([key, text]) => `<div class="check-item"><span>${text}</span>
+    <select aria-label="Status: ${text}" onchange="saveCheck('${key}', this.value)">
+      ${['offen','teilweise','erledigt'].map(v => `<option ${saved[key] === v ? 'selected' : ''}>${v}</option>`).join('')}
+    </select></div>`;
+  const specific = CHECK_EPOCHS[checkEpoch][1].map((text, i) => ['topic_' + i, 'Ich erkläre: ' + text + '.']);
+  document.getElementById("checklist-items").innerHTML = '<h3>Gemeinsame Vorgaben des Aufgabenblatts</h3>' + CHECK_COMMON.map(row).join('')
+    + '<h3>Schwerpunkte: ' + CHECK_EPOCHS[checkEpoch][0] + '</h3>' + specific.map(row).join('')
+    + '<h3>Zusätzliche Empfehlungen</h3><p>Diese Punkte helfen dir bei der Vorbereitung; sie sind keine zusätzlichen Pflichtvorgaben des Aufgabenblatts.</p>'
+    + [['tip_context','Ich erläutere den historischen und gesellschaftlichen Zusammenhang.'],['tip_audio','Ich zeige typische musikalische Merkmale am Hörbeispiel.'],['tip_sources','Ich prüfe die Zuverlässigkeit meiner Quellen und gebe sie an.'],['tip_question','Eine Leitfrage hilft mir, meine Präsentation zu strukturieren.']].map(row).join('');
+}
+function saveCheck(key, val) {
+  const saved = readChecks();
+  saved[checkEpoch] = saved[checkEpoch] || {};
+  saved[checkEpoch][key] = val;
+  localStorage.setItem("musicaCheckPdf_v2", JSON.stringify(saved));
 }
 
 const notesInput = document.getElementById("notes-input");
