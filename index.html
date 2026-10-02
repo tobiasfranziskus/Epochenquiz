@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Musica Aeterna – Epochenquiz</title>
 <style>
-:root{--bg:#f7f7f9;--card:#fff;--text:#1a1a1a;--muted:#555;--accent:#4a90d9;--border:#ddd;--ok:#2e7d32;--danger:#c62828}
+:root{--bg:#f7f7f9;--card:#fff;--text:#1a1a1a;--muted:#555;--accent:#1f5f9f;--border:#ddd;--ok:#2e7d32;--danger:#c62828}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -41,26 +41,38 @@ input{min-width:20px;min-height:20px;margin-top:.2rem}
 .ok{background:#e8f5e9;border-color:#c8e6c9;color:#1b5e20}
 .feedback:empty{display:none}
 textarea{width:100%;min-height:120px;padding:.5rem;border:1px solid var(--border);border-radius:8px;font:inherit;resize:vertical}
+button:focus-visible,.option:focus-within,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #1a1a1a;outline-offset:3px}
+h2:focus{outline:none}
+fieldset.card{min-width:0;margin-inline:0}
+legend{font-weight:700;padding:0 .25rem}
+.option.correct span::after{content:" – richtig";font-weight:700}
+.option.wrong span::after{content:" – falsch";font-weight:700}
+.check{justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem 1rem;padding:.4rem 0;border-bottom:1px solid var(--border)}
+.check label{flex:1 1 16rem}
+select{font:inherit;min-height:44px;padding:.4rem;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text)}
 </style>
 </head>
 <body>
 <header>
   <h1>Musica Aeterna – Epochenquiz</h1>
-  <p>Sechs Epochen. Dein Überblick. Prüfe dein Wissen und plane deine Präsentation.</p>
+  <p>Recherche-Check und Präsentationsvorbereitung: Sechs Epochen, dein Überblick.</p>
 </header>
 
 <main>
 <section id="start-section">
   <h2>Willkommen</h2>
-  <p>Dieses Quiz hilft dir, zentrale Aspekte einer Musikepoche zu überprüfen. Es ersetzt keine eigene Recherche. Verwende für deine Präsentation mehrere geeignete Quellen und notiere zu jeder wichtigen Information, woher sie stammt.</p>
+  <p>Dieses Quiz hilft dir, deine Recherche zu einer Musikepoche zu überprüfen. Es fragt zentrale Bereiche ab, die in einer Präsentation berücksichtigt werden sollten. Es ersetzt keine eigene Recherche und ist kein vollständiger Wissenstest. Nutze dein Ergebnis als Hinweis darauf, welche Inhalte du noch prüfen oder vertiefen musst. Nach dem Quiz prüfst du die Checkliste, recherchierst fehlende Inhalte und gibst Quellen an.</p>
   <div class="info-box"><strong>Ziel:</strong> Nach dem Quiz erstellst du selbstständig eine Präsentation zu einer Musikepoche. Das Quiz dient als Absicherung und Vollständigkeitscheck.</div>
   <div class="warning-box"><strong>Wichtig:</strong> Das Quiz ist eine Lernhilfe. Für deine Präsentation musst du selbst recherchieren und geeignete Quellen verwenden. Eine richtige Quizantwort ist noch kein ausreichender Beleg.</div>
   <h3>So arbeitest du</h3>
   <ol>
-    <li>Wähle eine Musikepoche.</li>
-    <li>Lies die Lernkarten oder starte direkt mit dem Quiz.</li>
-    <li>Nutze die Checkliste, um deine Präsentation vorzubereiten.</li>
-    <li>Recherchiere selbstständig in geeigneten Quellen und gib diese an.</li>
+    <li>Wissen entdecken: Lernkarten lesen.</li>
+    <li>Quiz bearbeiten.</li>
+    <li>Ergebnis prüfen.</li>
+    <li>Präsentations-Checkliste bearbeiten.</li>
+    <li>Fehlende Inhalte recherchieren.</li>
+    <li>Quellen ergänzen.</li>
+    <li>Präsentation vorbereiten.</li>
   </ol>
   <div class="row">
     <button data-go="wissen-section">Wissen entdecken</button>
@@ -68,6 +80,7 @@ textarea{width:100%;min-height:120px;padding:.5rem;border:1px solid var(--border
     <button class="secondary" data-go="praesentation-section">Präsentation vorbereiten</button>
     <button class="secondary" data-go="lehrkraft-section">Lehrkraft</button>
     <button class="secondary" data-go="quellen-section">Quellen</button>
+    <button class="secondary" data-go="datenschutz-section">Datenschutz und Technik</button>
   </div>
 </section>
 
@@ -85,15 +98,17 @@ textarea{width:100%;min-height:120px;padding:.5rem;border:1px solid var(--border
 <section id="quiz-section" hidden>
   <h2>Quiz</h2>
   <p>Wähle eine Epoche und bearbeite die Fragen. Jede Frage kannst du nur einmal beantworten; die Antworten bleiben nur für diese Sitzung gespeichert.</p>
-  <div class="warning-box">Das Quiz bietet Orientierung, keine vollständige Wissensquelle.</div>
+  <div class="warning-box">Das Quiz ist kein vollständiger Wissenstest. Es überprüft vor allem Orientierungs- und Sachwissen. Die Höranalyse erfolgt anschließend im Unterricht oder im Rahmen deiner Präsentation.</div>
   <h3>Epoche wählen</h3>
   <div class="grid" id="epoch-selection"></div>
   <div id="quiz-container" hidden>
     <h3 id="quiz-epoch-title"></h3>
     <p id="quiz-score" aria-live="polite"></p>
     <div id="fragen-container"></div>
+    <div id="quiz-result" class="info-box" aria-live="polite" hidden></div>
     <div class="row">
-      <button id="btn-neustart">Fragen neu starten</button>
+      <button data-go="praesentation-section">Weiter zur Präsentations-Checkliste</button>
+      <button id="btn-neustart" class="secondary">Fragen neu starten</button>
       <button id="btn-epoche-wechseln" class="secondary">Epoche wechseln</button>
       <button class="secondary" data-go="start-section">Zurück zum Start</button>
     </div>
@@ -101,13 +116,14 @@ textarea{width:100%;min-height:120px;padding:.5rem;border:1px solid var(--border
 </section>
 
 <section id="praesentation-section" hidden>
-  <h2>Präsentation vorbereiten</h2>
+  <h2>Präsentation vorbereiten: Checkliste</h2>
   <p>Entwickle aus deinen Antworten eine Leitfrage. Ordne ein Werk in seinen historischen Kontext ein und belege mindestens zwei musikalische Merkmale an einem geeigneten Hörbeispiel.</p>
-  <div class="info-box">Die Checkliste hilft dir, alle wichtigen Punkte zu beachten. Deine Auswahl und deine Notizen werden automatisch lokal im Browser gespeichert.</div>
+  <div class="info-box">Wähle bei jedem Punkt: offen, teilweise bearbeitet oder erledigt. Deine Auswahl und deine Notizen werden nur auf diesem Gerät im Browser gespeichert, nicht auf anderen Geräten.</div>
+  <p id="check-stand" aria-live="polite"></p>
   <div id="checklist-container"></div>
   <h3>Notizen zu deiner Präsentation</h3>
   <p>Hier kannst du Stichpunkte zu Leitfrage, Personen, Werken, Hörbeispiel und Quellen festhalten.</p>
-  <textarea id="notes" placeholder="Leitfrage, Ideen, Quellen, Hörbeispiel..."></textarea>
+  <textarea id="notes" aria-label="Notizen zu deiner Präsentation" placeholder="Leitfrage, Ideen, Quellen, Hörbeispiel..."></textarea>
   <div class="row">
     <button id="btn-kopieren" class="secondary">Notizen kopieren</button>
     <button id="btn-loeschen" class="danger">Notizen löschen</button>
@@ -141,8 +157,6 @@ textarea{width:100%;min-height:120px;padding:.5rem;border:1px solid var(--border
   <p>Aufnahmen sind nicht eingebettet. Die widersprüchlichen Zuordnungen beim Kaiserquartett sowie bei Schönberg und Webern eignen sich noch nicht für bewertete Hörfragen. Für die Präsentation wird eine passende Aufnahme von der Lehrkraft oder den Lernenden geprüft.</p>
   <h3>Quellen und Prüfumfang</h3>
   <p>Grundlage: Musica-Aeterna-Wissensbestandsaufnahme.md aus Musica-Aeterna-Komplett.html. Eine externe Einzelfaktenprüfung sämtlicher Inhalte wurde nicht vorgenommen.</p>
-  <h3>Technik</h3>
-  <p>Eigenständige HTML-Datei ohne externe Bibliotheken oder Netzwerkzugriffe. Quizantworten bleiben nur im Arbeitsspeicher; Notizen und Checkliste werden lokal im Browser gespeichert (falls nicht möglich, steht „Notizen kopieren“ bereit). Es werden keine Daten übertragen.</p>
   <div class="row"><button data-go="start-section">Zurück zum Start</button></div>
 </section>
 
@@ -164,6 +178,12 @@ textarea{width:100%;min-height:120px;padding:.5rem;border:1px solid var(--border
     <li>Bei Hörbeispielen: Interpret/Ensemble, Werk, Tonträger oder Plattform, URL, Abrufdatum.</li>
   </ul>
   <div class="info-box">Deine Quellenliste steht am Ende der Präsentation. Bei Bedarf kannst du wichtige Quellen auch direkt bei einzelnen Folien nennen.</div>
+  <div class="row"><button data-go="start-section">Zurück zum Start</button></div>
+</section>
+<section id="datenschutz-section" hidden>
+  <h2>Datenschutz und Technik</h2>
+  <p>Es werden keine personenbezogenen Daten erhoben oder übertragen. Quizantworten bleiben nur für diese Sitzung gespeichert. Notizen und Checklistenstatus werden – sofern aktiviert – ausschließlich lokal auf diesem Gerät gespeichert.</p>
+  <p>Die Datei ist eigenständig: keine externen Bibliotheken, Schriftarten, Analysewerkzeuge oder Netzwerkzugriffe. Sie funktioniert offline im Browser. Wenn das Speichern nicht klappt, hilft „Notizen kopieren“.</p>
   <div class="row"><button data-go="start-section">Zurück zum Start</button></div>
 </section>
 </main>
@@ -195,7 +215,15 @@ const fragenPool = {
     { id: "re_1", text: "Welche weltliche Gattung der Renaissance vertonte vor allem volkssprachliche Dichtung, etwa von Petrarca?",
       options: ["Das italienische Madrigal", "Der gregorianische Choral", "Die Sinfonie", "Die Kantate"], correct: 0,
       hint: "Denke an vertonte Dichtung in der Volkssprache.",
-      explanation: "Das italienische Madrigal vertonte häufig humanistische Dichtung in der Volkssprache und gilt als typische weltliche Gattung der Renaissance." }
+      explanation: "Das italienische Madrigal vertonte häufig humanistische Dichtung in der Volkssprache und gilt als typische weltliche Gattung der Renaissance." },
+    { id: "re_2", text: "Es heißt, Palestrina habe die mehrstimmige Kirchenmusik vor einem Verbot gerettet. Wie ist das einzuordnen?",
+      options: ["Es ist eine Legende, die später um Palestrina entstand", "Es ist durch Konzilsbeschlüsse genau belegt", "Palestrina hat die Mehrstimmigkeit erfunden", "Das Konzil verbot damals jede Musik in Kirchen"], correct: 0,
+      hint: "Überlege, wie verlässlich spätere Erzählungen über berühmte Personen sind.",
+      explanation: "Die Erzählung von der „Rettung“ der Polyphonie gilt als Legende. Das Konzil von Trient forderte vor allem verständliche Texte. Prüfe solche Geschichten in Fachliteratur." },
+    { id: "re_3", text: "Was bedeutet Mehrchörigkeit, wie sie etwa im Markusdom in Venedig gepflegt wurde?",
+      options: ["Mehrere räumlich getrennte Chöre oder Instrumentalgruppen musizieren abwechselnd und zusammen", "Gewöhnliche Mehrstimmigkeit in einem einzigen Chor", "Ein Chor singt nur einstimmig", "Eine Praxis, die ausschließlich im Barock vorkam"], correct: 0,
+      hint: "Achte auf das Wort „räumlich“.",
+      explanation: "Mehrchörigkeit ist etwas anderes als gewöhnliche Mehrstimmigkeit. Sie war besonders im späten 16. und frühen 17. Jahrhundert verbreitet, also an der Grenze von Renaissance und Barock." }
   ],
   barock: [
     { id: "ba_1", text: "Welches Merkmal ist für die Musik des Barock besonders typisch?",
@@ -207,7 +235,11 @@ const fragenPool = {
     { id: "kl_1", text: "Welche Form ist in der Wiener Klassik besonders wichtig für Instrumentalwerke?",
       options: ["Die durchkomponierte Oper", "Die Sonatensatzform", "Die Zwölftonkomposition", "Das freie Improvisationsstück"], correct: 1,
       hint: "Denke an Symphonien, Streichquartette und Sonaten.",
-      explanation: "Die Sonatensatzform ist ein zentrales Gestaltungsprinzip der Wiener Klassik in Symphonien, Streichquartetten und Sonaten." }
+      explanation: "Die Sonatensatzform ist ein zentrales Gestaltungsprinzip der Wiener Klassik in Symphonien, Streichquartetten und Sonaten." },
+    { id: "kl_2", text: "Wie lässt sich Beethovens Stellung in der Musikgeschichte am besten beschreiben?",
+      options: ["Zentrale Figur der Klassik mit Übergängen zur Romantik", "Reiner Komponist der Französischen Revolution, seine Musik ist nur politisch zu verstehen", "Barockkomponist", "Komponist der Romantik ohne Bezug zur Klassik"], correct: 0,
+      hint: "Epochen haben Übergänge.",
+      explanation: "Beethoven gehört zur Klassik und weist zur Romantik. Die Umbrüche seiner Zeit (Französische Revolution, Napoleonische Kriege) mit den Idealen von Freiheit und Gleichheit sind wichtiger Hintergrund. Seine Werke sind aber keine einfache politische Programmmusik." }
   ],
   romantik: [
     { id: "ro_1", text: "Welches Merkmal passt besonders gut zur Musik der Romantik?",
@@ -229,9 +261,14 @@ const lernkarten = {
     { titel: "Gesellschaft und Musik im Mittelalter", text: "Die Musik war stark von Kirche und Kloster geprägt. Mehrstimmigkeit entstand zunächst im Rahmen der Liturgie." },
     { titel: "Organum", text: "Frühe Form der Mehrstimmigkeit, bei der eine Stimme einem Cantus firmus in Quart- oder Quintabstand folgt." }
   ],
-  renaissance: [{ titel: "Humanismus und Musik", text: "Humanistische Ideen führten zu einer stärkeren Orientierung an antiken Texten und zu neuen Gattungen wie dem Madrigal." }],
+  renaissance: [{ titel: "Humanismus und Musik", text: "Humanistische Ideen führten zu einer stärkeren Orientierung an antiken Texten und zu neuen Gattungen wie dem Madrigal." },
+    { titel: "Mehrchörigkeit", text: "Mehrere Chöre oder Instrumentalgruppen stehen räumlich getrennt, etwa im Markusdom in Venedig. Das ist nicht dasselbe wie gewöhnliche Mehrstimmigkeit. Besonders verbreitet im späten 16. und frühen 17. Jahrhundert." },
+    { titel: "Palestrina und die Legende", text: "Die Geschichte, Palestrina habe die Polyphonie „gerettet“, gilt als Legende. Prüfe solche Erzählungen in Fachliteratur." }
+  ],
   barock: [{ titel: "Generalbass", text: "Typische Begleitpraxis des Barock: Ein Bassinstrument und ein Tasteninstrument realisieren Harmonien nach Ziffern." }],
-  klassik: [{ titel: "Wiener Klassik", text: "Zentren waren Wien und Umgebung. Wichtige Komponisten: Haydn, Mozart, Beethoven." }],
+  klassik: [{ titel: "Wiener Klassik", text: "Zentren waren Wien und Umgebung. Wichtige Komponisten: Haydn, Mozart, Beethoven." },
+    { titel: "Beethoven und seine Zeit", text: "Beethoven ist zentrale Figur der Klassik mit Übergängen zur Romantik. Die Französische Revolution und die Napoleonischen Kriege sind Hintergrund, erklären seine Musik aber nicht allein." }
+  ],
   romantik: [{ titel: "Subjektivität", text: "Musik als Ausdruck persönlicher Gefühle und individueller Weltsicht." }],
   moderne: [{ titel: "Zwölftonmusik", text: "Entwicklung durch Arnold Schönberg; alle zwölf chromatischen Töne werden in einer festgelegten Reihe organisiert." }]
 };
@@ -249,7 +286,7 @@ const checkliste = [
     "Ich habe wichtige Aufführungsorte oder Funktionen der Musik beschrieben.",
     "Ich habe nicht nur allgemeine Jahreszahlen gesammelt, sondern Zusammenhänge erklärt."] },
   { gruppe: "Personen und Werke", items: [
-    "Ich stelle mindestens zwei wichtige Personen vor.",
+    "Ich stelle mindestens zwei wichtige Komponistinnen oder Komponisten vor.",
     "Ich nenne mindestens ein konkret benanntes Werk.",
     "Ich habe überprüft, ob die Person und das Werk tatsächlich zur gewählten Epoche gehören.",
     "Ich unterscheide zwischen gesicherten Informationen und historischen Legenden oder Vermutungen."] },
@@ -257,6 +294,7 @@ const checkliste = [
     "Ich erkläre mindestens zwei typische musikalische Merkmale.",
     "Ich beschreibe diese Merkmale mit eigenen Worten.",
     "Ich verbinde jedes Merkmal mit einem konkreten Werk oder Hörbeispiel.",
+    "Ich habe typische Gattungen, Formen oder Besetzungen der Epoche genannt.",
     "Ich habe die Besetzung des ausgewählten Werkes recherchiert.",
     "Ich kann erklären, woran man die Merkmale beim Hören erkennen kann."] },
   { gruppe: "Hörbeispiel", items: [
@@ -265,10 +303,12 @@ const checkliste = [
     "Ich habe den vollständigen Werktitel notiert.",
     "Ich habe die verwendete Plattform oder Website angegeben.",
     "Ich habe einen konkreten Ausschnitt oder Zeitabschnitt ausgewählt.",
+    "Ich kann mindestens zwei musikalische Merkmale am Hörbeispiel belegen.",
     "Meine Hörbeobachtungen beziehen sich auf das tatsächlich gehörte Beispiel."] },
   { gruppe: "Eigene Recherche", items: [
     "Ich habe mindestens drei geeignete Quellen verwendet.",
     "Darunter befindet sich mindestens eine fachlich zuverlässige Quelle.",
+    "Ich habe geprüft, wie zuverlässig meine Quellen sind (Autor, Herausgeber, Aktualität).",
     "Ich habe Informationen aus mehreren Quellen miteinander verglichen.",
     "Ich habe nicht nur das Quiz oder eine einzelne Website verwendet.",
     "Ich habe wichtige Aussagen anhand der Quellen überprüft.",
@@ -311,7 +351,9 @@ function status(msg, warn) {
 const show = id => {
   document.querySelectorAll("main > section").forEach(s => (s.hidden = s.id !== id));
   scrollTo({ top: 0, behavior: "smooth" });
+  $(id).querySelector("h2").focus({ preventScroll: true });
 };
+document.querySelectorAll("h2").forEach(h => (h.tabIndex = -1));
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-go]");
   if (b) show(b.dataset.go);
@@ -346,26 +388,29 @@ function markiere(card, f) {
   card.querySelector("[data-hint]").hidden = true;
   const fb = card.querySelector(".feedback");
   fb.className = "feedback " + (ok ? "ok" : "nok");
-  fb.textContent = (ok ? "Richtig. " : "Nicht ganz. ") + f.explanation;
+  fb.textContent = (ok ? "Richtig. " : `Falsch. Richtig ist: ${f.options[f.correct]}. `) + f.explanation + (ok ? "" : " Prüfe diesen Punkt noch einmal in einer geeigneten Quelle.");
 }
 
 function zeigeStand() {
   const fr = fragenPool[epoche], beantwortet = fr.filter(f => f.id in antworten);
-  $("quiz-score").textContent = fr.length
-    ? `${beantwortet.filter(f => antworten[f.id] === f.correct).length} von ${fr.length} richtig · ${beantwortet.length} beantwortet` : "";
+  const richtig = beantwortet.filter(f => antworten[f.id] === f.correct).length;
+  $("quiz-score").textContent = fr.length ? `${richtig} von ${fr.length} richtig · ${beantwortet.length} beantwortet` : "";
+  const fertig = fr.length > 0 && beantwortet.length === fr.length, r = richtig / fr.length;
+  $("quiz-result").hidden = !fertig;
+  if (fertig) $("quiz-result").innerHTML = `<strong>${r < .5 ? "Grundlagen noch einmal prüfen" : r < .75 ? "Gute Orientierung – einzelne Bereiche vertiefen" : r < 1 ? "Gute Grundlage für die weitere Recherche" : "Sehr sichere Orientierung – jetzt Quellen und Hörbeispiel prüfen"}</strong><br>Dein Ergebnis zeigt, wie sicher du bei einigen Grundlagen bist. Es bewertet nicht deine gesamte Recherche und sagt nicht aus, ob deine Präsentation vollständig ist.<br><strong>Nächster Schritt:</strong> Prüfe jetzt die Präsentations-Checkliste, recherchiere fehlende Inhalte und notiere zu wichtigen Aussagen geeignete Quellen.`;
 }
 
 function renderQuiz() {
   const fr = fragenPool[epoche];
   $("quiz-epoch-title").textContent = "Fragen: " + epochen[epoche];
   $("fragen-container").innerHTML = fr.length ? fr.map((f, n) => `
-    <div class="card" data-id="${f.id}">
-      <strong>Frage ${n + 1}: ${f.text}</strong>
+    <fieldset class="card" data-id="${f.id}">
+      <legend>Frage ${n + 1}: ${f.text}</legend>
       <div class="options">${f.options.map((o, i) =>
         `<label class="option"><input type="radio" name="${f.id}" value="${i}"><span>${o}</span></label>`).join("")}</div>
       <button class="secondary" data-hint>Hinweis</button>
       <div class="feedback"></div>
-    </div>`).join("") : "<p>Für diese Epoche sind noch keine Fragen hinterlegt.</p>";
+    </fieldset>`).join("") : "<p>Für diese Epoche sind noch keine Fragen hinterlegt.</p>";
   document.querySelectorAll("#fragen-container .card").forEach((card, i) => {
     if (fr[i].id in antworten) markiere(card, fr[i]);
   });
@@ -419,18 +464,29 @@ $("btn-epoche-wechseln").onclick = () => {
 };
 
 // ---------- Checkliste ----------
-let erledigt = {};
-try { erledigt = JSON.parse(lesen(KEY_CHECK)) || {}; } catch {}
+const STUFEN = ["offen", "teilweise bearbeitet", "erledigt"];
+let stand = {};
+try { stand = JSON.parse(lesen(KEY_CHECK)) || {}; } catch {}
+const stufe = k => stand[k] === true ? "erledigt" : STUFEN.includes(stand[k]) ? stand[k] : "offen";
 
 $("checklist-container").innerHTML = checkliste.map((g, gi) =>
-  `<div><h4>${g.gruppe}</h4>` + g.items.map((t, ii) => {
+  `<h4>${g.gruppe}</h4>` + g.items.map((t, ii) => {
     const k = `${gi}_${ii}`;
-    return `<label class="check"><input type="checkbox" data-k="${k}"${erledigt[k] ? " checked" : ""}><span>${t}</span></label>`;
-  }).join("") + "</div>").join("");
+    return `<div class="check"><label for="c${k}">${t}</label><select id="c${k}" data-k="${k}">${STUFEN.map(s => `<option${s === stufe(k) ? " selected" : ""}>${s}</option>`).join("")}</select></div>`;
+  }).join("")).join("");
 
-$("checklist-container").addEventListener("change", () =>
-  schreiben(KEY_CHECK, JSON.stringify(Object.fromEntries(
-    [...document.querySelectorAll("#checklist-container input")].map(i => [i.dataset.k, i.checked])))));
+const zaehle = () => {
+  const sel = [...document.querySelectorAll("#checklist-container select")];
+  $("check-stand").textContent = `${sel.filter(s => s.value === "erledigt").length} von ${sel.length} Punkten erledigt, ${sel.filter(s => s.value === "teilweise bearbeitet").length} teilweise bearbeitet.`;
+  return sel;
+};
+zaehle();
+
+$("checklist-container").addEventListener("change", () => {
+  const sel = zaehle();
+  if (!schreiben(KEY_CHECK, JSON.stringify(Object.fromEntries(sel.map(x => [x.dataset.k, x.value])))))
+    status("Speichern auf diesem Gerät klappt gerade nicht. Deine Auswahl bleibt nur, bis du die Seite schließt.", true);
+});
 
 // ---------- Notizen ----------
 const notes = $("notes");
@@ -438,7 +494,7 @@ notes.value = lesen(KEY_NOTES) || "";
 
 notes.addEventListener("input", () => {
   if (!schreiben(KEY_NOTES, notes.value))
-    status("Lokales Speichern ist nicht möglich. Nutze „Notizen kopieren“, um den Text zu sichern.", true);
+    status("Speichern auf diesem Gerät klappt gerade nicht. Nutze „Notizen kopieren“ und füge den Text in eine andere App ein.", true);
 });
 
 $("btn-kopieren").onclick = async () => {
