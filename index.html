@@ -1150,7 +1150,7 @@ function renderChecklist() {
   const topicTargets = assignment.topics.map((_, i) => checkEpoch === 'moderne_nach'
     ? (i === 2 ? [2, 3, 4, 5] : i === 3 ? [6] : [i]) : [i]);
   document.getElementById("pdf-assignment").innerHTML = `
-    <div class="pdf-source-tag">Dein Original-Arbeitsauftrag · PDF-Seite ${assignment.page}</div>
+    <div class="pdf-source-tag">Dein Arbeitsauftrag</div>
     <h3>${assignment.title}</h3>
     <p>${assignment.assignment}</p>
     <a href="#check-common">Allgemeine Vorgaben überprüfen ↓</a>
