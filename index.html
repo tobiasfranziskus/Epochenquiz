@@ -50,6 +50,9 @@ legend{font-weight:700;padding:0 .25rem}
 .check{justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem 1rem;padding:.4rem 0;border-bottom:1px solid var(--border)}
 .check label{flex:1 1 16rem}
 select{font:inherit;min-height:44px;padding:.4rem;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text)}
+.grafik{background:#fff;color:#1a1a1a;border:1px solid var(--border);border-radius:8px;margin:.5rem 0;padding:.25rem}
+.grafik svg{display:block;margin:0 auto}
+.bereich{font-weight:400;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -136,6 +139,7 @@ select{font:inherit;min-height:44px;padding:.4rem;border:1px solid var(--border)
   <h2>Hinweise für die Lehrkraft</h2>
   <h3>Unterricht und Material</h3>
   <p>Sechs frei wählbare Epochenmodule. Jede Frage hat vier Antwortmöglichkeiten (bei jedem Start in zufälliger Reihenfolge), genau eine Lösung, einen Hinweis und eine Erklärung. „Wissen entdecken“ bietet den Lernstoff als Karten.</p>
+  <p>Jede Epoche enthält 10 Fragen aus verschiedenen Wissensbereichen (z. B. Notation, Instrumente, Gesellschaft, Satztechnik), davon 2 Transferfragen: Sie verlangen, Wissen auf neue Beispiele anzuwenden. Die Antworten sind bewusst plausible Alternativen. Die Notengrafiken sind selbst gezeichnete SVG-Grafiken; Internetbilder sind nicht eingebunden, damit die Datei offline und frei von Bildrechten bleibt. Grundlagen der Transferfragen wurden u. a. zu Petruccis „Odhecaton“ (1501), Schönbergs „Pierrot lunaire“ (1912, frei atonal) und Cages „4 Minuten 33 Sekunden“ (1952) gegengeprüft.</p>
   <p><strong>Arbeitsvorschlag:</strong> etwa 15–25 Minuten für Lernkarten und Quiz einer Epoche; anschließend Präsentationsplanung. Für die Oberstufe lassen sich Antworten durch Werkvergleiche und eigene Hörbeobachtungen vertiefen.</p>
   <h3>Redaktionelle Entscheidungen</h3>
   <ul>
@@ -195,82 +199,167 @@ const $ = id => document.getElementById(id);
 
 const epochen = { mittelalter: "Mittelalter", renaissance: "Renaissance", barock: "Barock", klassik: "Klassik", romantik: "Romantik", moderne: "Moderne" };
 
-// PRÜFHINWEIS (intern): In diesem Fragenpool gibt es keine Frage zum „Kaiserquartett“ und keine Frage, die
-// Aufnahmen von Schönberg oder Webern zuordnet. Widersprüchliche Zuordnungen sind hier daher nicht erkennbar.
-// ACHTUNG: Falls solche Fragen aus der größeren Fassung ergänzt werden, Kaiserquartett (Haydn, op. 76 Nr. 3)
-// sowie Schönberg/Webern (Zuordnung von Werken und Aufnahmen) vorher fachlich prüfen.
-// Fragen: correct = Index der richtigen Option (die Reihenfolge wird beim Start gemischt). Weitere Fragen einfach ergänzen.
+// PRÜFHINWEIS (intern): Es gibt keine Frage zum „Kaiserquartett“ und keine Frage, die Aufnahmen von Schönberg oder Webern zuordnet.
+// ACHTUNG: Falls solche Fragen aus der größeren Fassung ergänzt werden, Kaiserquartett (Haydn, op. 76 Nr. 3) sowie Schönberg/Webern vorher fachlich prüfen.
+// Q(id, Bereich, Frage, richtige Antwort, [falsche Antworten], Hinweis, Erklärung, {transfer:true | grafik:{…}})
+// Die Reihenfolge der Antworten wird beim Start gemischt. Falsche Antworten sollen plausible Alternativen sein, keine offensichtlich epochenfremden.
+const Q = (id, bereich, text, richtig, falsch, hint, explanation, extra) => ({ id, bereich, text, options: [richtig, ...falsch], correct: 0, hint, explanation, ...extra });
 const fragenPool = {
   mittelalter: [
-    { id: "ma_1", text: "Welche gesellschaftliche Gruppe prägte im Hochmittelalter maßgeblich die mehrstimmige Kirchenmusik?",
-      options: ["Adelige Ritter bei Hoffesten", "Kleriker in Klöstern und Kathedralen", "Bürgerliche Stadtmusiker in Gilden", "Bauern bei kirchlichen Festen"], correct: 1,
-      hint: "Denke an die Orte, an denen lateinische Messen und Offizien gefeiert wurden.",
-      explanation: "Im Hochmittelalter wurde die mehrstimmige Kirchenmusik vor allem von Klerikern in Klöstern und an Kathedralen gepflegt." },
-    { id: "ma_2", text: "Welches Merkmal ist für die frühe Mehrstimmigkeit (Organum) typisch?",
-      options: ["Strenge Zwölftonreihen", "Parallelbewegung von Stimmen im Quart- oder Quintabstand", "Durchkomponierte Liedformen mit Refrain", "Ausschließlich instrumentale Begleitung"], correct: 1,
-      hint: "Es geht um den Abstand zwischen den Stimmen.",
-      explanation: "Im frühen Organum bewegen sich die Stimmen oft parallel im Quart- oder Quintabstand zum Cantus firmus." }
+    Q("ma_1", "Gesellschaft", "Welche gesellschaftliche Gruppe prägte im Hochmittelalter maßgeblich die mehrstimmige Kirchenmusik?", "Kleriker in Klöstern und Kathedralen", ["Adelige Ritter bei Hoffesten", "Bürgerliche Stadtmusiker in Gilden", "Bauern bei kirchlichen Festen"],
+      "Denke an die Orte, an denen lateinische Messen und Offizien gefeiert wurden.", "Im Hochmittelalter wurde die mehrstimmige Kirchenmusik vor allem von Klerikern in Klöstern und an Kathedralen gepflegt."),
+    Q("ma_2", "Satztechnik", "Welches Merkmal ist für die frühe Mehrstimmigkeit (Organum) typisch?", "Parallelbewegung von Stimmen im Quart- oder Quintabstand", ["Imitierende Stimmeinsätze in allen Stimmen", "Durchkomponierte Liedformen mit Refrain", "Ausschließlich instrumentale Begleitung"],
+      "Es geht um den Abstand zwischen den Stimmen.", "Im frühen Organum bewegen sich die Stimmen oft parallel im Quart- oder Quintabstand zum Cantus firmus."),
+    Q("ma_3", "Gesellschaft", "Wo wurden Sänger im Mittelalter vor allem ausgebildet?", "In Kloster- und Domschulen", ["In Handwerkerzünften", "Auf Burgen in Ritterschulen", "In Wanderbühnen der Spielleute"],
+      "Denke an die Orte, an denen der Gottesdienst gesungen wurde.", "Die Sänger lernten die Gesänge der Liturgie vor allem in Kloster- und Domschulen. Notation half, die Melodien weiterzugeben."),
+    Q("ma_4", "Notation", "Wozu dienten Neumen, die frühen Notenzeichen des Mittelalters?", "Sie zeigten ungefähr, wie sich die Melodie über dem Text bewegt", ["Sie legten genau Tonhöhe und Tondauer fest", "Sie bezeichneten die Instrumente einer Begleitgruppe", "Sie markierten Atempausen im Text"],
+      "Neumen sind Gedächtnisstützen für Sänger.", "Frühe Neumen zeigten die ungefähre Richtung der Melodie. Genaue Tonhöhen und Tondauern ließen sich damit noch nicht festlegen."),
+    Q("ma_5", "Personen", "Wofür ist Guido von Arezzo (um 1000) bekannt?", "Für Verbesserungen der Notation und Lernhilfen zum Singen vom Blatt", ["Für die Erfindung der genau messbaren Notenwerte (Mensuralnotation)", "Für die Gründung der Notre-Dame-Schule in Paris", "Für die erste Messe eines einzelnen Komponisten"],
+      "Es geht um das Lesen und Lernen von Melodien.", "Guido wird mit Notenlinien und Hilfen zum Erlernen von Melodien verbunden. Das machte die Ausbildung von Sängern leichter."),
+    Q("ma_6", "Epochenbegriffe", "Welche Neuerung kennzeichnet die Ars nova im 14. Jahrhundert (z. B. Guillaume de Machaut)?", "Rhythmisch freiere und genauer notierte Musik mit neuen Notenwerten", ["Die Beschränkung auf einstimmige Gesänge", "Der Verzicht auf Notenschrift", "Die Einführung des Taktstrichs in jeder Partitur"],
+      "Der Name bedeutet „neue Kunst“.", "In der Ars nova wurden Rhythmen genauer notiert und vielfältiger. Machaut schrieb geistliche und weltliche Musik."),
+    Q("ma_t1", "Gattungen", "Du siehst ein Notenbild: nur eine Melodielinie, Neumen, lateinischer Text, keine Begleitung. Um welche Gattung handelt es sich am ehesten?", "Gregorianischer Choral", ["Organum mit zwei Stimmen", "Motette mit mehreren Texten", "Trobadorlied"],
+      "Achte auf Einstimmigkeit, Sprache und Notenschrift.", "Einstimmig, lateinisch, mit Neumen notiert: Das sind typische Merkmale des gregorianischen Chorals im Gottesdienst.", {transfer:true}),
+    Q("ma_t2", "Gesellschaft", "Ein Lied aus dem 12. Jahrhundert ist einstimmig, in der Volkssprache, handelt von unerfüllter Liebe und wird von einem Ritter-Dichter vorgetragen. Wohin gehört es am ehesten?", "Zum Minnesang (Trobadors und Minnesänger)", ["Zum gregorianischen Choral", "Zur Notre-Dame-Motette", "Zum Organum"],
+      "Weltlich oder geistlich? Lateinisch oder Volkssprache?", "Der Minnesang ist weltlich und einstimmig und nutzt die Volkssprache. Der Choral dagegen ist geistlich und lateinisch.", {transfer:true}),
+    Q("ma_7", "Notation", "Welche Notation zeigt die Grafik?", "Quadratnotation auf vier Linien (Choralnotation)", ["Weiße Mensuralnotation auf fünf Linien", "Lautentabulatur mit Buchstaben", "Neumen ohne Linien, nur über dem Text"],
+      "Zähle die Linien und achte auf die Form der Noten.", "Die Choralnotation nutzt vier Linien und quadratische Noten. Die weiße Mensuralnotation hat fünf Linien und kam später.", {"grafik": {"alt": "Vier Notenlinien mit quadratischen Noten", "systeme": [{"linien": 4, "form": "quadrat", "t": "Notenbeispiel", "n": [[2, 0], [3, 1], [4, 2], [3, 3], [2, 4], [1, 5], [2, 6]]}]}}),
+    Q("ma_8", "Instrumente", "Welches Instrument gehört nicht zu den im Mittelalter üblichen Instrumenten?", "Das Hammerklavier", ["Die Fidel", "Das Portativ", "Die Laute"],
+      "Eines wurde erst um 1700 entwickelt.", "Das Hammerklavier entwickelte Bartolomeo Cristofori um 1700. Fidel, Portativ und Laute kannte man im Mittelalter.")
   ],
   renaissance: [
-    { id: "re_1", text: "Welche weltliche Gattung der Renaissance vertonte vor allem volkssprachliche Dichtung, etwa von Petrarca?",
-      options: ["Das italienische Madrigal", "Der gregorianische Choral", "Die Sinfonie", "Die Kantate"], correct: 0,
-      hint: "Denke an vertonte Dichtung in der Volkssprache.",
-      explanation: "Das italienische Madrigal vertonte häufig humanistische Dichtung in der Volkssprache und gilt als typische weltliche Gattung der Renaissance." },
-    { id: "re_2", text: "Es heißt, Palestrina habe die mehrstimmige Kirchenmusik vor einem Verbot gerettet. Wie ist das einzuordnen?",
-      options: ["Es ist eine Legende, die später um Palestrina entstand", "Es ist durch Konzilsbeschlüsse genau belegt", "Palestrina hat die Mehrstimmigkeit erfunden", "Das Konzil verbot damals jede Musik in Kirchen"], correct: 0,
-      hint: "Überlege, wie verlässlich spätere Erzählungen über berühmte Personen sind.",
-      explanation: "Die Erzählung von der „Rettung“ der Polyphonie gilt als Legende. Das Konzil von Trient forderte vor allem verständliche Texte. Prüfe solche Geschichten in Fachliteratur." },
-    { id: "re_3", text: "Was bedeutet Mehrchörigkeit, wie sie etwa im Markusdom in Venedig gepflegt wurde?",
-      options: ["Mehrere räumlich getrennte Chöre oder Instrumentalgruppen musizieren abwechselnd und zusammen", "Gewöhnliche Mehrstimmigkeit in einem einzigen Chor", "Ein Chor singt nur einstimmig", "Eine Praxis, die ausschließlich im Barock vorkam"], correct: 0,
-      hint: "Achte auf das Wort „räumlich“.",
-      explanation: "Mehrchörigkeit ist etwas anderes als gewöhnliche Mehrstimmigkeit. Sie war besonders im späten 16. und frühen 17. Jahrhundert verbreitet, also an der Grenze von Renaissance und Barock." }
+    Q("re_1", "Gattungen", "Welche weltliche Gattung der Renaissance vertonte vor allem volkssprachliche Dichtung, etwa von Petrarca?", "Das italienische Madrigal", ["Der gregorianische Choral", "Die lateinische Messe", "Die Motette"],
+      "Denke an vertonte Dichtung in der Volkssprache.", "Das italienische Madrigal vertonte häufig humanistische Dichtung in der Volkssprache und gilt als typische weltliche Gattung der Renaissance."),
+    Q("re_2", "Geschichte und Legende", "Es heißt, Palestrina habe die mehrstimmige Kirchenmusik vor einem Verbot gerettet. Wie ist das einzuordnen?", "Es ist eine Legende, die später um Palestrina entstand", ["Es ist durch Konzilsbeschlüsse genau belegt", "Palestrina hat die Mehrstimmigkeit erfunden", "Das Konzil verbot damals jede Musik in Kirchen"],
+      "Überlege, wie verlässlich spätere Erzählungen über berühmte Personen sind.", "Die Erzählung von der „Rettung“ der Polyphonie gilt als Legende. Das Konzil von Trient forderte vor allem verständliche Texte. Prüfe solche Geschichten in Fachliteratur."),
+    Q("re_3", "Satztechnik", "Was bedeutet Mehrchörigkeit, wie sie etwa im Markusdom in Venedig gepflegt wurde?", "Mehrere räumlich getrennte Chöre oder Instrumentalgruppen musizieren abwechselnd und zusammen", ["Gewöhnliche Mehrstimmigkeit in einem einzigen Chor", "Ein Chor singt alle Stimmen im Unisono", "Eine Chorfassung, die ohne Text auskommt"],
+      "Achte auf das Wort „räumlich“.", "Mehrchörigkeit ist etwas anderes als gewöhnliche Mehrstimmigkeit. Sie war besonders im späten 16. und frühen 17. Jahrhundert verbreitet, also an der Grenze von Renaissance und Barock."),
+    Q("re_4", "Satztechnik", "Was bedeutet Imitation in der mehrstimmigen Musik der Renaissance?", "Eine Stimme greift ein Motiv auf, das zuvor eine andere Stimme gesungen hat", ["Alle Stimmen singen im gleichen Rhythmus Akkorde", "Eine Stimme hält dauernd einen Ton", "Ein Instrument ahmt Vogelstimmen nach"],
+      "Die Stimmen „antworten“ einander.", "Bei der Imitation setzen die Stimmen nacheinander mit demselben oder einem ähnlichen Motiv ein. Das prägt die Renaissance-Polyphonie stark."),
+    Q("re_5", "Personen", "Wofür ist Josquin des Prez (um 1500) bekannt?", "Für Messen und Motetten mit ausdrucksvoller Textbehandlung", ["Für die ersten Opern der Geschichte", "Für die Entwicklung der Notenlinien", "Für Lieder der Minnesänger"],
+      "Er lebte um 1500.", "Josquin gilt als einer der bedeutendsten Komponisten um 1500. Seine Musik richtet sich oft nach dem Sinn des Textes."),
+    Q("re_6", "Gesellschaft", "Welche Rolle spielte der Gesang in der Reformation um Martin Luther?", "Gemeindelieder in deutscher Sprache sollten das Mitsingen der Gemeinde ermöglichen", ["Jede Musik im Gottesdienst wurde verboten", "Es gab nur noch lateinische Chorgesänge", "Instrumente ersetzten den Gesang"],
+      "Wer sollte nach Luthers Vorstellung mitsingen?", "Luther förderte deutschsprachige Gemeindelieder. Dadurch sang die Gemeinde selbst im Gottesdienst mit."),
+    Q("re_t1", "Satztechnik", "In einem Madrigal singen die Stimmen beim Wort „Seufzer“ kurze Pausen und fallende Töne. Wie nennt man dieses Verfahren?", "Wortausdeutung (Madrigalismus)", ["Imitation", "Cantus firmus", "Fauxbourdon"],
+      "Die Musik malt den Textinhalt nach.", "Madrigalismen verdeutlichen einzelne Wörter durch Musik. Das passt zum Ausdruck des Textes im Madrigal.", {transfer:true}),
+    Q("re_t2", "Notation und Medien", "Der Drucker Ottaviano Petrucci brachte 1501 in Venedig mit dem „Odhecaton“ ein Buch mit mehrstimmigen Liedern heraus. Welche Folge hatte der Notendruck?", "Musik ließ sich leichter verbreiten, und mehr Menschen kamen an Noten", ["Die Zahl der Abschriften sank, weil Mönche nicht mehr kopierten", "Nur noch einstimmige Gesänge wurden gedruckt", "Komponisten konnten ihre Werke nur in Klöstern veröffentlichen"],
+      "Was verändert ein Druck im Vergleich zu handgeschriebenen Noten?", "Der Odhecaton gilt als erstes gedrucktes Buch mit mehrstimmiger Musik. Gedruckte Noten machten Musik leichter und breiter verfügbar.", {transfer:true}),
+    Q("re_7", "Notation", "Was zeigt die Notenzeile aus zwei Stimmen?", "Imitation: Die zweite Stimme nimmt das Motiv der ersten zeitversetzt auf", ["Parallelorganum in Quinten", "Homophone Akkorde in beiden Stimmen", "Einen Orgelpunkt in der Unterstimme"],
+      "Vergleiche die Form der ersten Töne in beiden Stimmen.", "Die zweite Stimme beginnt später mit demselben Tonhöhenverlauf, nur tiefer. Das ist Imitation.", {"grafik": {"alt": "Zwei Notenzeilen: Die untere Stimme wiederholt das Motiv der oberen versetzt", "systeme": [{"t": "Stimme 1", "n": [[4, 0], [6, 1], [5, 2], [3, 3], [4, 4], [2, 5]]}, {"t": "Stimme 2", "n": [[1, 2], [3, 3], [2, 4], [0, 5]]}]}}),
+    Q("re_8", "Personen", "Wer gilt als wichtiger Vertreter der venezianischen Mehrchörigkeit am Markusdom?", "Giovanni Gabrieli", ["Josquin des Prez", "Giovanni Pierluigi da Palestrina", "Orlando di Lasso"],
+      "Denke an Venedig.", "Giovanni Gabrieli (um 1555–1612) schrieb Werke für mehrere Chöre und Instrumentalgruppen am Markusdom.")
   ],
   barock: [
-    { id: "ba_1", text: "Welches Merkmal ist für die Musik des Barock besonders typisch?",
-      options: ["Ausschließlich homophone Satztechnik", "Generalbass-Praxis und Betonung von Kontrasten", "Verbot von Dissonanzen", "Nur vokale Musik ohne Instrumente"], correct: 1,
-      hint: "Denke an die Begleitung mit Tasteninstrumenten und Bassinstrumenten.",
-      explanation: "Die Generalbass-Praxis und der bewusste Einsatz von Kontrasten (z. B. laut/leise, Solo/Tutti) sind typisch für die Barockmusik." }
+    Q("ba_1", "Satztechnik", "Welches Merkmal ist für die Musik des Barock besonders typisch?", "Generalbass-Praxis und Betonung von Kontrasten", ["Ausschließlich homophone Satztechnik", "Alleinige Verwendung der Kirchentonarten", "Nur vokale Musik ohne Instrumente"],
+      "Denke an die Begleitung mit Tasteninstrumenten und Bassinstrumenten.", "Die Generalbass-Praxis und der bewusste Einsatz von Kontrasten (z. B. laut/leise, Solo/Tutti) sind typisch für die Barockmusik."),
+    Q("ba_2", "Gattungen", "Wann und wo entstand die Oper?", "Um 1600 in Italien", ["Um 1500 in Frankreich", "Um 1700 in Wien", "Um 1650 in England"],
+      "Monteverdis „L'Orfeo“ entstand 1607.", "Die Oper entstand um 1600 in Italien. Im Barock wurde sie zur wichtigen Gattung."),
+    Q("ba_3", "Formenlehre", "Was kennzeichnet ein barockes Solokonzert?", "Ein Solist und das Orchester wechseln sich ab", ["Ein Chor wechselt sich mit einem Orchester ab", "Zwei Orchester spielen gleichzeitig dieselbe Stimme", "Der Solist spielt ganz ohne Begleitung"],
+      "„Concertare“ kann auch „wetteifern“ bedeuten.", "Im Solokonzert treten Solist und Orchester (Tutti) im Wechsel auf. Das passt zum barocken Prinzip der Kontraste."),
+    Q("ba_4", "Formenlehre", "Was ist typisch für eine Fuge?", "Ein Thema setzt nacheinander in den Stimmen ein", ["Eine Melodie mit Akkordbegleitung", "Zwei Themen werden vorgestellt, durchgeführt und wiederholt", "Alle Stimmen singen dasselbe Motiv gleichzeitig im Unisono"],
+      "Denke an Bachs „Kunst der Fuge“.", "In einer Fuge wandert ein Thema durch die Stimmen. Das ist ein Höhepunkt barocker Polyphonie."),
+    Q("ba_5", "Ästhetik", "Was meint die Affektenlehre im Barock?", "Musik soll bestimmte Affekte wie Freude oder Trauer darstellen und wecken", ["Eine Lehre vom Aufbau der Kirchentonarten", "Regeln für das Stimmen von Tasteninstrumenten", "Eine Anleitung zum Auswendiglernen von Chorälen"],
+      "Affekt bedeutet hier Gefühl.", "Die Affektenlehre ordnet musikalischen Mitteln bestimmte Gefühle zu. Komponisten wollten Gefühle gezielt darstellen."),
+    Q("ba_6", "Gattungen", "Welche Gattung ist ein groß angelegtes geistliches Werk für Solisten, Chor und Orchester, das meist ohne Bühnenhandlung aufgeführt wird?", "Das Oratorium", ["Die Oper", "Die Suite", "Das Concerto grosso"],
+      "Denke an Händels „Messiah“ oder Bachs Passionen.", "Das Oratorium ist eine große geistliche Gattung für Solisten, Chor und Orchester, meist ohne szenische Aufführung."),
+    Q("ba_t1", "Satztechnik", "Du hörst: Cembalo und Cello spielen durchgehend die Basslinie, darüber Streicher. Die Lautstärke wechselt stufenweise zwischen laut und leise. Welche Praxis erkennst du?", "Generalbass mit stufenweisen Kontrasten (Terrassendynamik)", ["Mehrchörige Anlage mit räumlich getrennten Gruppen", "Cantus-firmus-Satz mit dem Tenor als Melodieträger", "Alleinige Begleitung durch Laute und Gitarre"],
+      "Welche Gruppe spielt „durchgehend“ den Bass?", "Generalbass und Kontraste sind häufige barocke Merkmale. Sie sind aber keine ausnahmslose Regel.", {transfer:true}),
+    Q("ba_t2", "Geschichte und Legende", "Vivaldis „Die vier Jahreszeiten“ (um 1720) enthalten Vogelgesang, Gewitter und bellenden Hund. Was sagt das über die Aussage „Programmmusik gibt es erst in der Romantik“?", "Sie stimmt so nicht: Tonmalerei gibt es schon im Barock, die Romantik baut sie aus", ["Sie stimmt, weil Vivaldi nur abstrakte Konzertformen verwendete", "Sie stimmt, weil Tonmalerei im Barock nur in der Oper vorkam", "Sie stimmt, weil Programmmusik erst durch Beethoven erfunden wurde"],
+      "Prüfe Behauptungen an einem Beispiel.", "Vivaldi nutzt Tonmalerei und eine erzählende Idee. Die Programmmusik der Romantik knüpft daran an, geht aber weiter.", {transfer:true}),
+    Q("ba_7", "Notation", "Was bedeuten die Zahlen unter den Bassnoten?", "Sie geben an, welche Intervalle und Akkorde über dem Bass gespielt werden", ["Sie bezeichnen den Fingersatz der linken Hand", "Sie legen das Tempo in Schlägen pro Minute fest", "Sie zeigen, welche Stimme im Chor einsetzt"],
+      "Der Continuo-Spieler muss daraus Akkorde bilden.", "Die Ziffern sind eine Kurzschrift: Der Cembalist oder Organist ergänzt darüber die Harmonien (Generalbass).", {"grafik": {"alt": "Vier Bassnoten mit Zahlen darunter", "systeme": [{"t": "Basslinie", "n": [[2, 0], [3, 1, 0, "6"], [1, 2, 0, "7"], [2, 3]]}]}}),
+    Q("ba_8", "Instrumente", "Welche Instrumente spielen im Barock typischerweise den Generalbass?", "Ein Tasteninstrument (Cembalo oder Orgel) und ein Bassinstrument", ["Zwei Piccoloflöten", "Horn und Pauke", "Nur die Violinen"],
+      "Es braucht ein Fundament aus Harmonien und Bass.", "Der Generalbass wird oft von Cembalo oder Orgel und einem Bassinstrument wie Cello gespielt.")
   ],
   klassik: [
-    { id: "kl_1", text: "Welche Form ist in der Wiener Klassik besonders wichtig für Instrumentalwerke?",
-      options: ["Die durchkomponierte Oper", "Die Sonatensatzform", "Die Zwölftonkomposition", "Das freie Improvisationsstück"], correct: 1,
-      hint: "Denke an Symphonien, Streichquartette und Sonaten.",
-      explanation: "Die Sonatensatzform ist ein zentrales Gestaltungsprinzip der Wiener Klassik in Symphonien, Streichquartetten und Sonaten." },
-    { id: "kl_2", text: "Wie lässt sich Beethovens Stellung in der Musikgeschichte am besten beschreiben?",
-      options: ["Zentrale Figur der Klassik mit Übergängen zur Romantik", "Reiner Komponist der Französischen Revolution, seine Musik ist nur politisch zu verstehen", "Barockkomponist", "Komponist der Romantik ohne Bezug zur Klassik"], correct: 0,
-      hint: "Epochen haben Übergänge.",
-      explanation: "Beethoven gehört zur Klassik und weist zur Romantik. Die Umbrüche seiner Zeit (Französische Revolution, Napoleonische Kriege) mit den Idealen von Freiheit und Gleichheit sind wichtiger Hintergrund. Seine Werke sind aber keine einfache politische Programmmusik." }
+    Q("kl_1", "Formenlehre", "Welche Form ist in der Wiener Klassik besonders wichtig für Instrumentalwerke?", "Die Sonatensatzform", ["Die Passacaglia", "Die Toccata", "Das Ricercar"],
+      "Denke an Symphonien, Streichquartette und Sonaten.", "Die Sonatensatzform ist ein zentrales Gestaltungsprinzip der Wiener Klassik in Symphonien, Streichquartetten und Sonaten."),
+    Q("kl_2", "Personen", "Wie lässt sich Beethovens Stellung in der Musikgeschichte am besten beschreiben?", "Zentrale Figur der Klassik mit Übergängen zur Romantik", ["Reiner Komponist der Französischen Revolution, dessen Musik nur politisch zu verstehen ist", "Vertreter der Frühromantik ohne Bezug zur Wiener Klassik", "Vertreter der Berliner Liederschule"],
+      "Epochen haben Übergänge.", "Beethoven gehört zur Klassik und weist zur Romantik. Die Umbrüche seiner Zeit (Französische Revolution, Napoleonische Kriege) mit den Idealen von Freiheit und Gleichheit sind wichtiger Hintergrund. Seine Werke sind aber keine einfache politische Programmmusik."),
+    Q("kl_3", "Formenlehre", "Was passiert in der Exposition eines Sonatensatzes?", "Die Themen werden vorgestellt, meist in Grundtonart und Gegentonart", ["Alle Themen werden zerlegt und verarbeitet", "Das Hauptthema kehrt in der Grundtonart zurück", "Der Solist spielt eine freie Kadenz"],
+      "Der Name kommt von „ausstellen“.", "Die Exposition stellt die Themen vor. Verarbeitet werden sie in der Durchführung, wiederholt in der Reprise."),
+    Q("kl_4", "Instrumente", "Aus welchen Instrumenten besteht ein typisches Streichquartett?", "Zwei Violinen, Viola und Violoncello", ["Violine, Viola, Cello und Kontrabass", "Zwei Violinen, Cello und Klavier", "Violine, Viola, Cello und Cembalo"],
+      "Denke an Haydn, den „Vater des Streichquartetts“.", "Das Streichquartett besteht üblicherweise aus zwei Violinen, einer Viola und einem Cello."),
+    Q("kl_5", "Satztechnik", "Welche Satzart ist in der Klassik häufig?", "Melodie mit Begleitung in klar gegliederten Phrasen", ["Dichte, streng imitierende Polyphonie", "Ein Cantus firmus im Tenor", "Ein ununterbrochener Generalbass ohne Gliederung"],
+      "Klarheit und Ausgewogenheit waren Ideale.", "Klassische Musik ist oft homophon und klar gegliedert. Das ist eine häufige Praxis, keine ausnahmslose Regel."),
+    Q("kl_6", "Gattungen", "Zu welcher Gattung zählt Mozarts „Die Zauberflöte“?", "Zum deutschsprachigen Singspiel", ["Zur Opera seria in italienischer Sprache", "Zum Oratorium", "Zur Messe"],
+      "Es wird teils gesprochen und teils gesungen.", "Die Zauberflöte (1791) ist ein Singspiel in deutscher Sprache mit gesprochenen Dialogen."),
+    Q("kl_t1", "Formenlehre", "In einem Sinfoniesatz hörst du Motive des Hauptthemas, zerlegt und in wechselnden Tonarten verarbeitet, die Spannung steigt. Welchem Abschnitt des Sonatensatzes ordnest du das zu?", "Der Durchführung", ["Der Exposition", "Der Reprise", "Der Coda"],
+      "Hier wird „durchgeführt“, also verarbeitet.", "In der Durchführung werden Themen und Motive verändert und durch verschiedene Tonarten geführt.", {transfer:true}),
+    Q("kl_t2", "Epochenbegriffe", "Beethovens 9. Sinfonie (1824) verwendet im Finale Chor und Solisten mit Schillers „Ode an die Freude“. Was zeigt das für die Grenze zwischen Klassik und Romantik?", "Beethoven erweitert klassische Gattungsgrenzen und weist zur Romantik", ["Sie beweist, dass Beethoven vor allem Opernkomponist war", "Sie zeigt, dass Epochen starre Abschnitte ohne Übergänge sind", "Sie ist ein Oratorium und keine Sinfonie"],
+      "Epochen haben Übergänge.", "Das Finale sprengt den üblichen Rahmen der Sinfonie. Epochengrenzen sind fließend.", {transfer:true}),
+    Q("kl_7", "Notation", "Welche Begleitfigur zeigt die Notenzeile?", "Albertibass (gebrochener Dreiklang: tief – hoch – mittel – hoch)", ["Basso ostinato (immer wiederkehrende Bassformel)", "Orgelpunkt (ein liegender Ton)", "Akkordrepetition (derselbe Akkord mehrfach)"],
+      "Verfolge die Auf- und Abbewegung der Töne.", "Der Albertibass bricht einen Dreiklang in der Reihenfolge tief – hoch – mittel – hoch und ist in der Klassik häufig.", {"grafik": {"alt": "Acht Noten im Muster tief, hoch, mittel, hoch", "systeme": [{"t": "Begleitung", "n": [[-2, 0], [2, 1], [0, 2], [2, 3], [-2, 4], [2, 5], [0, 6], [2, 7]]}]}}),
+    Q("kl_8", "Instrumente", "Welches Instrument gehörte in der Klassik zunehmend fest zum Orchester?", "Die Klarinette", ["Die Viola da gamba", "Die Tuba", "Das Saxophon"],
+      "Mozart schrieb sie für ein besonderes Konzert.", "Die Klarinette wurde in der Klassik fester Bestandteil des Orchesters, auch durch Mozart.")
   ],
   romantik: [
-    { id: "ro_1", text: "Welches Merkmal passt besonders gut zur Musik der Romantik?",
-      options: ["Strenge Orientierung an antiken Formen", "Betont subjektiver Ausdruck und erweiterte Harmonik", "Ausschließlich religiöse Texte", "Verzicht auf Melodien"], correct: 1,
-      hint: "Denke an Gefühle, Individualität und chromatische Akkorde.",
-      explanation: "In der Romantik stehen subjektiver Ausdruck, Individualität und eine stark erweiterte, oft chromatische Harmonik im Vordergrund." }
+    Q("ro_1", "Ästhetik", "Welches Merkmal passt besonders gut zur Musik der Romantik?", "Betont subjektiver Ausdruck und erweiterte Harmonik", ["Strenge Orientierung an antiken Formen", "Ausschließlich religiöse Texte", "Reine Vokalmusik ohne Instrumente"],
+      "Denke an Gefühle, Individualität und chromatische Akkorde.", "In der Romantik stehen subjektiver Ausdruck, Individualität und eine stark erweiterte, oft chromatische Harmonik im Vordergrund."),
+    Q("ro_2", "Gattungen", "Was ist ein Kunstlied (z. B. von Franz Schubert)?", "Ein Gedicht, vertont für Singstimme und Klavier, wobei das Klavier mitgestaltet", ["Ein Volkslied ohne Komponisten", "Ein Chorwerk ohne Begleitung", "Eine Opernarie"],
+      "Zwei gleichwertige Partner: Stimme und Klavier.", "Im Kunstlied deutet das Klavier den Text mit. Schubert schrieb über 600 Lieder."),
+    Q("ro_3", "Gattungen", "Was ist Programmmusik?", "Instrumentalmusik, die eine Geschichte oder ein Bild darstellen will", ["Absolute Musik ganz ohne Bezug zu Außermusikalischem", "Musik, die nur im Konzertsaal gespielt wird", "Vokalmusik mit Instrumentalbegleitung"],
+      "Außermusikalisches Programm.", "Programmmusik will außermusikalische Inhalte darstellen. Beispiele sind Berlioz und Liszt."),
+    Q("ro_4", "Gesellschaft", "Welche Rolle spielte Virtuosität (z. B. Paganini, Liszt) in der Romantik?", "Bravouröses Spiel wurde zum Publikumsereignis in Konzerten", ["Virtuosen spielten fast nur noch an Fürstenhöfen", "Virtuosen traten ausschließlich in Kirchen auf", "Brillante Technik galt als unwichtig, weil nur Improvisation zählte"],
+      "Konzerte wurden für ein größeres Publikum wichtig.", "Virtuosen begeisterten ein bürgerliches Publikum. Ihre Auftritte wurden zu Ereignissen."),
+    Q("ro_5", "Gattungen", "Was ist ein Charakterstück?", "Ein kurzes Stück, oft für Klavier, das mit einem Titel eine Stimmung oder ein Bild ausdrückt", ["Eine mehrsätzige Sinfonie mit Chorfinale", "Eine Fuge in strenger Form", "Eine Opernouvertüre"],
+      "Denke an Schumanns „Kinderszenen“.", "Charakterstücke tragen oft Titel und drücken Stimmungen aus."),
+    Q("ro_6", "Gesellschaft", "Was bedeutet Nationalromantik in der Musik?", "Komponisten greifen Volksmusik, Sagen und Landschaften ihres Landes auf", ["Alle Komponisten schreiben im gleichen Stil", "Musik wird nur für Staatsfeiern geschrieben", "Volksmusik wird verboten"],
+      "Denke an Smetanas „Die Moldau“.", "Viele Komponisten nutzten Elemente der eigenen Kultur, um ein nationales Gefühl auszudrücken."),
+    Q("ro_t1", "Gattungen", "Schubert vertonte 1814 Goethes „Gretchen am Spinnrade“. Im Klavier läuft eine gleichmäßige Figur wie ein Spinnrad, die bei Gretchens Erregung stockt. Welche romantische Idee zeigt sich?", "Das Klavier deutet Gefühle und Bilder des Textes mit", ["Das Klavier füllt nur Akkorde aus, ohne etwas zu deuten", "Die Singstimme ist nur Begleitung der Klavierfigur", "Das Lied ist als Sonatensatz angelegt"],
+      "Was „erzählt“ das Klavier?", "Im Kunstlied gestaltet das Klavier Stimmung und Bilder mit und ist nicht nur Begleitung.", {transfer:true}),
+    Q("ro_t2", "Gattungen", "In Berlioz' „Symphonie fantastique“ (1830) kehrt in allen Sätzen dieselbe Melodie wieder, die die Geliebte darstellt. Wie nannte Berlioz dieses wiederkehrende Thema?", "Idée fixe", ["Leitmotiv", "Cantus firmus", "Basso ostinato"],
+      "Französisch für „fester Gedanke“.", "Die idée fixe ist ein wiederkehrendes Thema, das eine Person oder Idee darstellt und die Sätze verbindet.", {transfer:true}),
+    Q("ro_7", "Notation", "Wie nennt man eine Tonfolge, die wie in der Notenzeile fast nur aus Halbtonschritten besteht?", "Chromatik", ["Pentatonik", "Ganztonleiter", "Kirchentonart (dorisch)"],
+      "Achte auf die Kreuze und die kleinen Abstände.", "Chromatische Linien aus Halbtonschritten prägen die erweiterte Harmonik der Romantik.", {"grafik": {"alt": "Acht Noten in Halbtonschritten aufwärts", "systeme": [{"t": "Notenbeispiel", "n": [[-2, 0], [-2, 1, 1], [-1, 2], [-1, 3, 1], [0, 4], [1, 5], [1, 6, 1], [2, 7]]}]}}),
+    Q("ro_8", "Instrumente", "Wie veränderte sich das Orchester im Verlauf der Romantik?", "Es wurde größer, mit zusätzlichen Blech- und Schlaginstrumenten", ["Es wurde kleiner, weil Kammermusik die Sinfonie ersetzte", "Es bestand nur noch aus Streichern", "Es verzichtete auf Holzbläser"],
+      "Denke an große Klangwirkungen.", "Orchester wurden größer und farbiger besetzt, um mehr Ausdruck und Lautstärke zu erreichen.")
   ],
   moderne: [
-    // ACHTUNG: Zweite Wiener Schule (Schönberg, Berg, Webern) – Zuordnung von Werken/Hörbeispielen bei Erweiterung prüfen.
-    { id: "mo_1", text: "Welches Verfahren prägt die Zweite Wiener Schule um Schönberg, Berg und Webern?",
-      options: ["Nur diatonische Tonleitern", "Reihentechnik mit allen zwölf Tönen der chromatischen Skala", "Ausschließlich tonale Kadenzharmonik", "Strenge Generalbassbegleitung"], correct: 1,
-      hint: "Denke an eine festgelegte Reihenfolge aller zwölf Töne.",
-      explanation: "Die Zwölftontechnik ordnet alle zwölf Töne der chromatischen Skala in einer festgelegten Reihe, aus der das Werk entwickelt wird." }
-  ]
+    Q("mo_1", "Satztechnik", "Welches Verfahren prägt die Zweite Wiener Schule um Schönberg, Berg und Webern?", "Reihentechnik mit allen zwölf Tönen der chromatischen Skala", ["Ausschließlich diatonische Kadenzharmonik", "Strenge Fugenform als alleiniges Prinzip", "Gleichzeitiges Erklingen zweier Tonarten (Bitonalität)"],
+      "Denke an eine festgelegte Reihenfolge aller zwölf Töne.", "Die Zwölftontechnik ordnet alle zwölf Töne der chromatischen Skala in einer festgelegten Reihe, aus der das Werk entwickelt wird."),
+    Q("mo_2", "Ästhetik", "Was ist typisch für Debussys „Prélude à l'après-midi d'un faune“ (1894)?", "Schwebende Harmonik und Klangfarben statt klarer Kadenzen", ["Klare Kadenzharmonik mit festen Dur-Moll-Funktionen", "Strenge Reihentechnik", "Dichte Fugen mit festem Thema"],
+      "Klang statt Ziel.", "Debussy gilt als Wegbereiter des Impressionismus in der Musik. Klangfarben und freie Harmonik sind wichtig."),
+    Q("mo_3", "Geschichte und Legende", "Welche Wirkung hatte die Uraufführung von Strawinskys „Le Sacre du printemps“ 1913 in Paris?", "Lautstarke Proteste im Publikum wegen wilder Rhythmen und scharfer Dissonanzen", ["Begeisterter, ruhiger Beifall bei der Uraufführung", "Ein Aufführungsverbot durch die Kirche in ganz Frankreich", "Das Publikum reagierte kaum, weil es das Werk für leise hielt"],
+      "Das Werk war ein Ballett.", "Die ungewohnten Rhythmen und Klänge sorgten für Aufregung. Das Werk gilt heute als Meilenstein."),
+    Q("mo_4", "Satztechnik", "Was bedeutet Atonalität?", "Musik ohne tonales Zentrum (kein Dur-Moll-Grundton)", ["Musik, die nur aus Geräuschen besteht", "Musik ausschließlich in Moll", "Musik ohne Rhythmus"],
+      "„A“ bedeutet „ohne“.", "Atonale Musik hat kein tonales Zentrum. Zwölftontechnik ist ein mögliches Ordnungsverfahren."),
+    Q("mo_5", "Technik", "Welche Entwicklung prägt die Musik nach 1950 besonders?", "Elektronische Klangerzeugung und Tonband", ["Der Verzicht auf Notenschrift in allen Konzerten", "Die Rückkehr zu reiner Dur-Moll-Tonalität in allen Gattungen", "Die Beschränkung auf akustische Instrumente"],
+      "Neue Technik für neue Klänge.", "Elektronische Studios (z. B. Köln) ermöglichten neue Klänge."),
+    Q("mo_6", "Gesellschaft", "Welchen Einfluss hatte der Jazz auf Komponisten der Kunstmusik im 20. Jahrhundert?", "Synkopen und Blue Notes wurden aufgegriffen, z. B. in Gershwins „Rhapsody in Blue“", ["Jazz wurde von Komponisten der Kunstmusik durchweg abgelehnt", "Jazz verdrängte das Orchester vollständig", "Jazz nutzte ausschließlich Zwölftonreihen"],
+      "Es geht um Rhythmus und Harmonik.", "Viele Komponisten nutzten Jazzelemente. Rhapsody in Blue (1924) ist ein bekanntes Beispiel."),
+    Q("mo_t1", "Satztechnik", "Schönbergs „Pierrot lunaire“ (1912) ist atonal. Die Zwölftontechnik entwickelte er erst Anfang der 1920er-Jahre. Was folgt daraus?", "Atonal ist nicht automatisch Zwölfton: Pierrot lunaire gilt als frei atonal", ["Pierrot lunaire ist ein Zwölftonwerk", "Atonal und Zwölfton bedeuten dasselbe", "Atonalität bedeutet, dass Rhythmus fehlt"],
+      "Vergleiche die Jahreszahlen.", "Atonalität bezeichnet fehlende Tonalität, Zwölftontechnik ist ein Ordnungsverfahren. Pierrot lunaire entstand davor.", {transfer:true}),
+    Q("mo_t2", "Ästhetik", "In John Cages Stück „4 Minuten 33 Sekunden“ (Uraufführung 1952) spielt der Pianist keinen Ton. Was soll das Werk zeigen?", "Auch Umgebungsgeräusche gehören zu dem, was man hören kann", ["Die Stille soll die Unfähigkeit des Pianisten zeigen", "Es ist ein Zwölftonstück, das nur aus Pausen besteht", "Das Stück will den Konzertbetrieb abschaffen"],
+      "Was hörst du, wenn niemand spielt?", "Cage wollte die Hörer auf die Geräusche der Umgebung aufmerksam machen.", {transfer:true}),
+    Q("mo_7", "Notation", "Was fällt an der abgebildeten Notenfolge auf?", "Alle zwölf Töne der Oktave kommen genau einmal vor", ["Sie steht in C-Dur und nutzt nur weiße Tasten", "Sie besteht nur aus Ganztonschritten", "Sie wiederholt einen Ton immer wieder"],
+      "Zähle die Noten und achte auf die Kreuze.", "Die Folge enthält zwölf verschiedene Töne. Eine solche Reihe ist die Ordnungsgrundlage der Zwölftontechnik.", {"grafik": {"alt": "Zwölf Noten, alle verschiedene Töne", "systeme": [{"t": "Notenbeispiel", "n": [[-2, 0], [2, 1], [6, 2], [3, 3], [0, 4], [4, 5], [1, 6, 1], [5, 7, 1], [2, 8, 1], [6, 9, 1], [3, 10, 1], [1, 11]]}]}}),
+    Q("mo_8", "Instrumente", "Was bedeutet der Begriff „präpariertes Klavier“ bei John Cage?", "Gegenstände zwischen den Saiten verändern den Klang", ["Ein Klavier ohne Tasten, das nur gezupft wird", "Ein elektronisch verstärkter Konzertflügel", "Ein Klavier mit zwei Tastaturen"],
+      "Es geht um Eingriffe am Instrument.", "Beim präparierten Klavier verändern Gegenstände zwischen den Saiten den Klang.")
+  ],
 };
 
 const lernkarten = {
   mittelalter: [
     { titel: "Gesellschaft und Musik im Mittelalter", text: "Die Musik war stark von Kirche und Kloster geprägt. Mehrstimmigkeit entstand zunächst im Rahmen der Liturgie." },
-    { titel: "Organum", text: "Frühe Form der Mehrstimmigkeit, bei der eine Stimme einem Cantus firmus in Quart- oder Quintabstand folgt." }
+    { titel: "Organum", text: "Frühe Form der Mehrstimmigkeit, bei der eine Stimme einem Cantus firmus in Quart- oder Quintabstand folgt." },
+    { titel: "Neumen, Guido, Ars nova, Minnesang", text: "Neumen zeigen die ungefähre Bewegung der Melodie. Guido von Arezzo (um 1000) wird mit Notenlinien und Lernhilfen zum Singen verbunden. Die Ars nova (14. Jh., Machaut) bringt freiere, genauer notierte Rhythmen. Der Minnesang ist weltlich, einstimmig und in der Volkssprache." }
   ],
   renaissance: [{ titel: "Humanismus und Musik", text: "Humanistische Ideen führten zu einer stärkeren Orientierung an antiken Texten und zu neuen Gattungen wie dem Madrigal." },
     { titel: "Mehrchörigkeit", text: "Mehrere Chöre oder Instrumentalgruppen stehen räumlich getrennt, etwa im Markusdom in Venedig. Das ist nicht dasselbe wie gewöhnliche Mehrstimmigkeit. Besonders verbreitet im späten 16. und frühen 17. Jahrhundert." },
-    { titel: "Palestrina und die Legende", text: "Die Geschichte, Palestrina habe die Polyphonie „gerettet“, gilt als Legende. Prüfe solche Erzählungen in Fachliteratur." }
+    { titel: "Palestrina und die Legende", text: "Die Geschichte, Palestrina habe die Polyphonie „gerettet“, gilt als Legende. Prüfe solche Erzählungen in Fachliteratur." },
+    { titel: "Imitation, Josquin, Luther, Notendruck", text: "Bei der Imitation greifen Stimmen ein Motiv nacheinander auf. Josquin (um 1500) ist ein Hauptmeister der Zeit. Luther förderte deutsche Gemeindelieder. Petrucci druckte 1501 in Venedig mehrstimmige Musik. Madrigalismen malen Wörter nach." }
   ],
-  barock: [{ titel: "Generalbass", text: "Typische Begleitpraxis des Barock: Ein Bassinstrument und ein Tasteninstrument realisieren Harmonien nach Ziffern." }],
+  barock: [{ titel: "Generalbass", text: "Typische Begleitpraxis des Barock: Ein Bassinstrument und ein Tasteninstrument realisieren Harmonien nach Ziffern." },
+    { titel: "Oper, Konzert, Fuge, Affekte, Oratorium", text: "Die Oper entsteht um 1600 in Italien. Im Solokonzert wechseln Solist und Orchester. Die Fuge lässt ein Thema durch die Stimmen wandern. Die Affektenlehre ordnet Mitteln Gefühle zu. Das Oratorium ist große geistliche Vokalmusik." }],
   klassik: [{ titel: "Wiener Klassik", text: "Zentren waren Wien und Umgebung. Wichtige Komponisten: Haydn, Mozart, Beethoven." },
-    { titel: "Beethoven und seine Zeit", text: "Beethoven ist zentrale Figur der Klassik mit Übergängen zur Romantik. Die Französische Revolution und die Napoleonischen Kriege sind Hintergrund, erklären seine Musik aber nicht allein." }
+    { titel: "Beethoven und seine Zeit", text: "Beethoven ist zentrale Figur der Klassik mit Übergängen zur Romantik. Die Französische Revolution und die Napoleonischen Kriege sind Hintergrund, erklären seine Musik aber nicht allein." },
+    { titel: "Sonatensatz, Streichquartett, Singspiel", text: "Sonatensatz: Exposition (Themen vorstellen), Durchführung (verarbeiten), Reprise (wiederholen). Das Streichquartett hat zwei Violinen, Viola und Cello. Mozarts „Zauberflöte“ ist ein deutschsprachiges Singspiel." }
   ],
-  romantik: [{ titel: "Subjektivität", text: "Musik als Ausdruck persönlicher Gefühle und individueller Weltsicht." }],
-  moderne: [{ titel: "Zwölftonmusik", text: "Entwicklung durch Arnold Schönberg; alle zwölf chromatischen Töne werden in einer festgelegten Reihe organisiert." }]
+  romantik: [{ titel: "Subjektivität", text: "Musik als Ausdruck persönlicher Gefühle und individueller Weltsicht." },
+    { titel: "Kunstlied, Programmmusik, Charakterstück, Nationalromantik", text: "Im Kunstlied gestalten Singstimme und Klavier gemeinsam. Programmmusik stellt außermusikalische Inhalte dar (Berlioz: idée fixe). Charakterstücke sind kurze Stücke mit Stimmungstitel. In der Nationalromantik nutzen Komponisten Volksmusik und Sagen des eigenen Landes." }],
+  moderne: [{ titel: "Zwölftonmusik", text: "Entwicklung durch Arnold Schönberg; alle zwölf chromatischen Töne werden in einer festgelegten Reihe organisiert." },
+    { titel: "Impressionismus, Atonalität, Zwölftontechnik, Cage", text: "Debussys Musik arbeitet mit Klangfarben und freier Harmonik. Atonal heißt: ohne tonales Zentrum. Die Zwölftontechnik ist ein Ordnungsverfahren, das Schönberg in den 1920er-Jahren entwickelte. „Pierrot lunaire“ (1912) ist frei atonal. Cage zeigt in „4 Minuten 33 Sekunden“ (1952), dass auch Umgebungsgeräusche hörbar sind." }]
 };
 
 const checkliste = [
@@ -400,12 +489,33 @@ function zeigeStand() {
   if (fertig) $("quiz-result").innerHTML = `<strong>${r < .5 ? "Grundlagen noch einmal prüfen" : r < .75 ? "Gute Orientierung – einzelne Bereiche vertiefen" : r < 1 ? "Gute Grundlage für die weitere Recherche" : "Sehr sichere Orientierung – jetzt Quellen und Hörbeispiel prüfen"}</strong><br>Dein Ergebnis zeigt, wie sicher du bei einigen Grundlagen bist. Es bewertet nicht deine gesamte Recherche und sagt nicht aus, ob deine Präsentation vollständig ist.<br><strong>Nächster Schritt:</strong> Prüfe jetzt die Präsentations-Checkliste, recherchiere fehlende Inhalte und notiere zu wichtigen Aussagen geeignete Quellen.`;
 }
 
+// Zeichnet kleine Notengrafiken als SVG (offline, ohne Bildrechte). Note: [Stufe (0 = unterste Linie), Spalte, Kreuz?, Ziffer?]
+function notenSvg({ alt, systeme }) {
+  const d = 8, W = 70 + 34 * (Math.max(...systeme.flatMap(s => s.n.map(n => n[1]))) + 1), H = systeme.length * 84 + 12;
+  let o = "";
+  systeme.forEach((sy, i) => {
+    const L = sy.linien || 5, top = i * 84 + 28, bot = top + (L - 1) * d, y = s => bot - s * d / 2;
+    if (sy.t) o += `<text x="8" y="${top - 12}" font-size="12" fill="currentColor">${sy.t}</text>`;
+    for (let k = 0; k < L; k++) o += `<line x1="8" x2="${W - 8}" y1="${top + k * d}" y2="${top + k * d}" stroke="currentColor"/>`;
+    sy.n.forEach(([s, slot, kreuz, ziffer]) => {
+      const x = 44 + slot * 34, cy = y(s), ab = s >= L - 1, sx = ab ? x - 5 : x + 5;
+      for (let t = -2; t >= s; t -= 2) o += `<line x1="${x - 10}" x2="${x + 10}" y1="${y(t)}" y2="${y(t)}" stroke="currentColor"/>`;
+      if (sy.form === "quadrat") o += `<rect x="${x - 5}" y="${cy - 4}" width="10" height="8" fill="currentColor"/>`;
+      else o += `<ellipse cx="${x}" cy="${cy}" rx="5.5" ry="4" transform="rotate(-20 ${x} ${cy})" fill="currentColor"/><line x1="${sx}" x2="${sx}" y1="${cy}" y2="${ab ? cy + 24 : cy - 24}" stroke="currentColor"/>`;
+      if (kreuz) o += `<text x="${x - 19}" y="${cy + 4}" font-size="13" fill="currentColor">♯</text>`;
+      if (ziffer) o += `<text x="${x}" y="${bot + 24}" font-size="13" text-anchor="middle" fill="currentColor">${ziffer}</text>`;
+    });
+  });
+  return `<div class="grafik"><svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="${alt}">${o}</svg></div>`;
+}
+
 function renderQuiz() {
   const fr = fragenPool[epoche];
   $("quiz-epoch-title").textContent = "Fragen: " + epochen[epoche];
   $("fragen-container").innerHTML = fr.length ? fr.map((f, n) => `
     <fieldset class="card" data-id="${f.id}">
-      <legend>Frage ${n + 1}: ${f.text}</legend>
+      <legend><small class="bereich">Frage ${n + 1} · ${f.bereich}${f.transfer ? " · Transferfrage" : ""}</small><br>${f.text}</legend>
+      ${f.grafik ? notenSvg(f.grafik) : ""}
       <div class="options">${f.options.map((o, i) =>
         `<label class="option"><input type="radio" name="${f.id}" value="${i}"><span>${o}</span></label>`).join("")}</div>
       <button class="secondary" data-hint>Hinweis</button>
